@@ -50,20 +50,10 @@ export function BrandStory() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.8 }}
-          className="mb-6 sm:mb-8 lg:mb-10" // TIGHT MARGIN
+          className="" // TIGHT MARGIN
         >
-          <span className="text-[10px] sm:text-xs tracking-[0.3em] sm:tracking-[0.4em] text-white/40 font-light block mb-2 sm:mb-3">
-            OUR STORY
-          </span>
-          <h2
-            id="about-heading"
-            className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight"
-          >
-            {storyData.heading}
-            <span className="font-extralight text-white/60 ml-2 sm:ml-3 block sm:inline mt-1 sm:mt-0">
-              {storyData.subheading}
-            </span>
-          </h2>
+        
+        
         </m.div>
 
         <m.div 

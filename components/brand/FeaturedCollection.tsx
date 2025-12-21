@@ -4,6 +4,7 @@
 import { useRef, useEffect, useState } from "react";
 import { m } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 import { HiArrowRight, HiArrowLeft, HiFire } from "react-icons/hi2";
 import { IoTimeOutline } from "react-icons/io5";
 
@@ -228,85 +229,86 @@ export function FeaturedCollection() {
             }}
           >
             {FEATURED_PRODUCTS.map((product, index) => (
-              <m.article
-                key={product.id}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[380px] group cursor-pointer snap-start relative flex flex-col h-full"
-              >
-                <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900 mb-4 border border-white/5">
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                    sizes="(max-width: 640px) 280px, (max-width: 1024px) 320px, 380px"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
-                  
-                  {product.badge && (
-                    <div className="absolute top-4 left-4 z-20">
-                      <span className="px-3 py-1.5 bg-white text-black text-[10px] tracking-[0.15em] uppercase font-bold shadow-lg">
-                        {product.badge}
+              <Link key={product.id} href={`/product/${product.id}`}>
+                <m.article
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  className="flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[380px] group cursor-pointer snap-start relative flex flex-col h-full"
+                >
+                  <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900 mb-4 border border-white/5">
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      sizes="(max-width: 640px) 280px, (max-width: 1024px) 320px, 380px"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
+                    
+                    {product.badge && (
+                      <div className="absolute top-4 left-4 z-20">
+                        <span className="px-3 py-1.5 bg-white text-black text-[10px] tracking-[0.15em] uppercase font-bold shadow-lg">
+                          {product.badge}
+                        </span>
+                      </div>
+                    )}
+
+                    {!product.badge && (
+                      <div className="absolute top-4 left-4 text-[10px] tracking-[0.3em] text-white/50">
+                        {String(index + 1).padStart(2, "0")}
+                      </div>
+                    )}
+
+                    <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 z-20">
+                      <button className="w-full py-3 bg-white text-black text-xs tracking-[0.2em] uppercase font-bold hover:bg-neutral-200 transition-colors shadow-xl">
+                        Quick Add
+                      </button>
+                    </div>
+                    <div className="absolute top-0 left-0 w-8 h-px bg-white/0 group-hover:bg-white/50 transition-colors duration-500" />
+                    <div className="absolute top-0 left-0 w-px h-8 bg-white/0 group-hover:bg-white/50 transition-colors duration-500" />
+                    <div className="absolute bottom-0 right-0 w-8 h-px bg-white/0 group-hover:bg-white/50 transition-colors duration-500" />
+                    <div className="absolute bottom-0 right-0 w-px h-8 bg-white/0 group-hover:bg-white/50 transition-colors duration-500" />
+                  </div>
+
+                  <div className="space-y-2.5 flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] tracking-[0.2em] text-white/40 uppercase">
+                        {product.category}
                       </span>
+                      {product.inventory && product.inventory < 10 && (
+                         <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 uppercase tracking-wider animate-pulse">
+                           <HiFire /> Only {product.inventory} Left
+                         </span>
+                      )}
                     </div>
-                  )}
-
-                  {!product.badge && (
-                    <div className="absolute top-4 left-4 text-[10px] tracking-[0.3em] text-white/50">
-                      {String(index + 1).padStart(2, "0")}
+                    <h3 className="text-sm sm:text-base text-white font-medium group-hover:text-white/80 transition-colors">
+                      {product.name}
+                    </h3>
+                    <div className="flex flex-wrap items-center justify-between gap-y-2">
+                      <div className="flex items-center gap-3">
+                          <span className="text-sm font-semibold text-white">
+                          ${product.price}
+                          </span>
+                          {product.originalPrice && (
+                          <span className="text-xs text-white/40 line-through">
+                              ${product.originalPrice}
+                          </span>
+                          )}
+                      </div>
+                      {product.saleEnds && (
+                          <div className="flex items-center gap-1.5 text-red-400">
+                          <IoTimeOutline className="animate-pulse text-sm" />
+                          <span className="text-[10px] font-bold tracking-widest uppercase">
+                              Ends <CountdownTimer targetDate={product.saleEnds} />
+                          </span>
+                          </div>
+                      )}
                     </div>
-                  )}
-
-                  <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 z-20">
-                    <button className="w-full py-3 bg-white text-black text-xs tracking-[0.2em] uppercase font-bold hover:bg-neutral-200 transition-colors shadow-xl">
-                      Quick Add
-                    </button>
                   </div>
-                  <div className="absolute top-0 left-0 w-8 h-px bg-white/0 group-hover:bg-white/50 transition-colors duration-500" />
-                  <div className="absolute top-0 left-0 w-px h-8 bg-white/0 group-hover:bg-white/50 transition-colors duration-500" />
-                  <div className="absolute bottom-0 right-0 w-8 h-px bg-white/0 group-hover:bg-white/50 transition-colors duration-500" />
-                  <div className="absolute bottom-0 right-0 w-px h-8 bg-white/0 group-hover:bg-white/50 transition-colors duration-500" />
-                </div>
-
-                <div className="space-y-2.5 flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] tracking-[0.2em] text-white/40 uppercase">
-                      {product.category}
-                    </span>
-                    {product.inventory && product.inventory < 10 && (
-                       <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 uppercase tracking-wider animate-pulse">
-                         <HiFire /> Only {product.inventory} Left
-                       </span>
-                    )}
-                  </div>
-                  <h3 className="text-sm sm:text-base text-white font-medium group-hover:text-white/80 transition-colors">
-                    {product.name}
-                  </h3>
-                  <div className="flex flex-wrap items-center justify-between gap-y-2">
-                    <div className="flex items-center gap-3">
-                        <span className="text-sm font-semibold text-white">
-                        ${product.price}
-                        </span>
-                        {product.originalPrice && (
-                        <span className="text-xs text-white/40 line-through">
-                            ${product.originalPrice}
-                        </span>
-                        )}
-                    </div>
-                    {product.saleEnds && (
-                        <div className="flex items-center gap-1.5 text-red-400">
-                        <IoTimeOutline className="animate-pulse text-sm" />
-                        <span className="text-[10px] font-bold tracking-widest uppercase">
-                            Ends <CountdownTimer targetDate={product.saleEnds} />
-                        </span>
-                        </div>
-                    )}
-                  </div>
-                </div>
-              </m.article>
+                </m.article>
+              </Link>
             ))}
           </div>
         </div>

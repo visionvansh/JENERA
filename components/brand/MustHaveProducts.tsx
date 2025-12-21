@@ -3,6 +3,7 @@
 
 import { m } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { HiArrowRight, HiFire, HiEye } from "react-icons/hi2";
 import { IoTimeOutline } from "react-icons/io5";
@@ -115,70 +116,72 @@ const CountdownTimer = ({ targetDate }: { targetDate: string }) => {
 
 const ProductCard = ({ product }: { product: any }) => {
   return (
-    <article className="group cursor-pointer w-[280px] sm:w-[320px] flex-shrink-0 relative flex flex-col h-full">
-      <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900 mb-4 border border-white/5">
-        <Image
-          src={product.image}
-          alt={product.name}
-          fill
-          className="object-cover transition-transform duration-700 group-hover:scale-105"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-        />
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
-        <div className="absolute top-3 left-3 flex flex-col gap-2 items-start">
-          {product.badge && (
-            <span className="px-3 py-1 bg-white text-black text-[10px] tracking-[0.15em] uppercase font-bold shadow-lg">
-              {product.badge}
-            </span>
-          )}
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 z-20">
-          <button className="w-full py-3 bg-white text-black text-xs tracking-[0.2em] uppercase font-bold hover:bg-neutral-200 transition-colors shadow-xl">
-            Add to Bag
-          </button>
-        </div>
-        <div className="absolute top-0 left-0 w-8 h-px bg-white/0 group-hover:bg-white/50 transition-colors duration-500" />
-        <div className="absolute top-0 left-0 w-px h-8 bg-white/0 group-hover:bg-white/50 transition-colors duration-500" />
-        <div className="absolute bottom-0 right-0 w-8 h-px bg-white/0 group-hover:bg-white/50 transition-colors duration-500" />
-        <div className="absolute bottom-0 right-0 w-px h-8 bg-white/0 group-hover:bg-white/50 transition-colors duration-500" />
-      </div>
-
-      <div className="space-y-2.5 flex-1">
-        <div className="flex justify-between items-start">
-          <span className="text-[10px] tracking-[0.2em] text-white/40 uppercase">
-            {product.category}
-          </span>
-          {product.inventory < 10 && (
-            <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 uppercase tracking-wider animate-pulse">
-              <HiFire /> Only {product.inventory} Left
-            </span>
-          )}
-        </div>
-        <h3 className="text-sm sm:text-base text-white font-medium group-hover:text-white/80 transition-colors leading-tight">
-          {product.name}
-        </h3>
-        <div className="flex flex-wrap items-center justify-between gap-y-2">
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-semibold text-white">
-              ${product.price}
-            </span>
-            {product.originalPrice && (
-              <span className="text-xs text-white/40 line-through">
-                ${product.originalPrice}
+    <Link href={`/product/${product.id}`}>
+      <article className="group cursor-pointer w-[280px] sm:w-[320px] flex-shrink-0 relative flex flex-col h-full">
+        <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900 mb-4 border border-white/5">
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            className="object-cover transition-transform duration-700 group-hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
+          <div className="absolute top-3 left-3 flex flex-col gap-2 items-start">
+            {product.badge && (
+              <span className="px-3 py-1 bg-white text-black text-[10px] tracking-[0.15em] uppercase font-bold shadow-lg">
+                {product.badge}
               </span>
             )}
-            {product.saleEnds && (
-            <div className="flex items-center gap-1.5 text-red-400">
-              <IoTimeOutline className="animate-pulse text-sm" />
-              <span className="text-[10px] font-bold tracking-widest uppercase">
-                Ends <CountdownTimer targetDate={product.saleEnds} />
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 z-20">
+            <button className="w-full py-3 bg-white text-black text-xs tracking-[0.2em] uppercase font-bold hover:bg-neutral-200 transition-colors shadow-xl">
+              Add to Bag
+            </button>
+          </div>
+          <div className="absolute top-0 left-0 w-8 h-px bg-white/0 group-hover:bg-white/50 transition-colors duration-500" />
+          <div className="absolute top-0 left-0 w-px h-8 bg-white/0 group-hover:bg-white/50 transition-colors duration-500" />
+          <div className="absolute bottom-0 right-0 w-8 h-px bg-white/0 group-hover:bg-white/50 transition-colors duration-500" />
+          <div className="absolute bottom-0 right-0 w-px h-8 bg-white/0 group-hover:bg-white/50 transition-colors duration-500" />
+        </div>
+
+        <div className="space-y-2.5 flex-1">
+          <div className="flex justify-between items-start">
+            <span className="text-[10px] tracking-[0.2em] text-white/40 uppercase">
+              {product.category}
+            </span>
+            {product.inventory < 10 && (
+              <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 uppercase tracking-wider animate-pulse">
+                <HiFire /> Only {product.inventory} Left
               </span>
+            )}
+          </div>
+          <h3 className="text-sm sm:text-base text-white font-medium group-hover:text-white/80 transition-colors leading-tight">
+            {product.name}
+          </h3>
+          <div className="flex flex-wrap items-center justify-between gap-y-2">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-semibold text-white">
+                ${product.price}
+              </span>
+              {product.originalPrice && (
+                <span className="text-xs text-white/40 line-through">
+                  ${product.originalPrice}
+                </span>
+              )}
+              {product.saleEnds && (
+              <div className="flex items-center gap-1.5 text-red-400">
+                <IoTimeOutline className="animate-pulse text-sm" />
+                <span className="text-[10px] font-bold tracking-widest uppercase">
+                  Ends <CountdownTimer targetDate={product.saleEnds} />
+                </span>
+              </div>
+            )}
             </div>
-          )}
           </div>
         </div>
-      </div>
-    </article>
+      </article>
+    </Link>
   );
 };
 

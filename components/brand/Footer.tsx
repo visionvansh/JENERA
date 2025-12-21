@@ -33,38 +33,36 @@ const SOCIAL_LINKS = [
   { icon: FaXTwitter, href: "https://x.com", label: "X" },
 ];
 
-const PAYMENT_METHODS = [
-  {
-    name: "Visa",
-    image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=100&q=80",
-    alt: "Visa"
-  },
-  {
-    name: "Mastercard", 
-    image: "https://images.unsplash.com/photo-1556742044-3c52d6e88c62?w=100&q=80",
-    alt: "Mastercard"
-  },
-  {
-    name: "American Express",
-    image: "https://images.unsplash.com/photo-1556742111-a301076d9d18?w=100&q=80", 
-    alt: "American Express"
-  },
-  {
-    name: "PayPal",
-    image: "https://images.unsplash.com/photo-1633265486064-086b219458ec?w=100&q=80",
-    alt: "PayPal"
-  },
-  {
-    name: "Apple Pay",
-    image: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=100&q=80",
-    alt: "Apple Pay"
-  },
-  {
-    name: "Google Pay",
-    image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=100&q=80",
-    alt: "Google Pay"
-  },
-];
+  const paymentIcons = [
+    {
+      name: "Klarna",
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Klarna_Wordmark_Transparent_And_Black_v2.svg/2560px-Klarna_Wordmark_Transparent_And_Black_v2.svg.png",
+    },
+    {
+      name: "Visa",
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png",
+    },
+    {
+      name: "Mastercard",
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png",
+    },
+    {
+      name: "Maestro",
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Maestro_2016.svg/1280px-Maestro_2016.svg.png",
+    },
+    {
+      name: "Apple Pay",
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Apple_Pay_logo.svg/2560px-Apple_Pay_logo.svg.png",
+    },
+    {
+      name: "Google Pay",
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png",
+    },
+    {
+      name: "Amex",
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/American_Express_logo_%282018%29.svg/1200px-American_Express_logo_%282018%29.svg.png",
+    },
+  ];
 
 function CollapsibleSection({ 
   title, 
@@ -209,30 +207,20 @@ export function Footer() {
             <span className="text-[8px] md:text-[9px] tracking-[0.25em] text-white/20 uppercase">
               Secure Payments
             </span>
-            <div className="flex items-center gap-1.5 md:gap-2 flex-wrap justify-center md:justify-end max-w-[280px] md:max-w-none">
-              {PAYMENT_METHODS.map((method, index) => (
-                <m.div
-                  key={method.name}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.05 }}
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  className="relative w-10 h-7 md:w-12 md:h-8 rounded-sm overflow-hidden border border-white/10 bg-white/5 backdrop-blur-sm group"
-                  title={method.name}
-                >
-                  <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <Image
-                    src={method.image}
-                    alt={method.alt}
-                    fill
-                    className="object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-300"
-                    sizes="(max-width: 768px) 40px, 48px"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent" />
-                </m.div>
-              ))}
-            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+                {paymentIcons.map((icon) => (
+                  <div
+                    key={icon.name}
+                    className="h-8 w-10 relative bg-white rounded p-1 shadow-sm"
+                  >
+                    <img
+                      src={icon.src}
+                      alt={icon.name}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                ))}
+              </div>
           </div>
 
           <p className="text-[9px] md:text-[10px] tracking-[0.15em] md:tracking-[0.2em] text-white/30 uppercase order-2 md:order-1 text-center md:text-left">
