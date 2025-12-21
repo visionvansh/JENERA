@@ -2,7 +2,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-// FIX 1: Import 'm' instead of 'motion'
 import { m, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -172,7 +171,6 @@ const AccordionItem = ({
       </button>
       <AnimatePresence>
         {isOpen && (
-          // FIX 2: motion.div -> m.div
           <m.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -193,11 +191,11 @@ const AccordionItem = ({
 // --- NEW COMPONENT: Instagram Style Community Card ---
 const InstagramCommunityCard = () => {
   return (
-    <div className="w-full max-w-[320px] mx-auto lg:mx-0">
+    <div className="w-full max-w-[320px] mx-auto lg:max-w-none lg:mx-0">
       {/* Header: Logo & Username */}
       <div className="flex items-center gap-3 mb-4">
         {/* Instagram Gradient Ring */}
-        <div className="relative w-12 h-12 p-[2px] rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-pink-500">
+        <div className="relative w-12 h-12 lg:w-14 lg:h-14 p-[2px] rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-pink-500">
           <div className="w-full h-full rounded-full bg-black p-[2px]">
             <div className="relative w-full h-full rounded-full overflow-hidden bg-white/10">
               <Image
@@ -213,17 +211,17 @@ const InstagramCommunityCard = () => {
         {/* Username & Blue Tick */}
         <div className="flex flex-col justify-center">
           <div className="flex items-center gap-1">
-            <span className="text-sm font-bold text-white tracking-tight">
+            <span className="text-sm lg:text-base font-bold text-white tracking-tight">
               jenera
             </span>
-            <HiCheckBadge className="w-4 h-4 text-blue-500" />
+            <HiCheckBadge className="w-4 h-4 lg:w-5 lg:h-5 text-blue-500" />
           </div>
-          <span className="text-[10px] text-white/40">@jenera</span>
+          <span className="text-[10px] lg:text-xs text-white/40">@jenera</span>
         </div>
       </div>
 
       {/* Post Content: 2 Squares */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2 lg:gap-3">
         {/* Square 1 */}
         <div className="relative aspect-square bg-neutral-800 rounded-sm flex items-center justify-center border border-white/5 hover:border-white/20 transition-colors cursor-pointer group">
           <Image
@@ -233,7 +231,7 @@ const InstagramCommunityCard = () => {
             className="object-cover"
           />
           <div className="absolute top-2 right-2 p-1">
-            <HiSquare2Stack className="w-5 h-5 text-white drop-shadow-md" />
+            <HiSquare2Stack className="w-5 h-5 lg:w-6 lg:h-6 text-white drop-shadow-md" />
           </div>
         </div>
 
@@ -246,7 +244,7 @@ const InstagramCommunityCard = () => {
             className="object-cover"
           />
           <div className="absolute top-2 right-2 p-1">
-            <HiSquare2Stack className="w-5 h-5 text-white drop-shadow-md" />
+            <HiSquare2Stack className="w-5 h-5 lg:w-6 lg:h-6 text-white drop-shadow-md" />
           </div>
         </div>
 
@@ -258,7 +256,7 @@ const InstagramCommunityCard = () => {
             className="object-cover"
           />
           <div className="absolute top-2 right-2 p-1">
-            <HiSquare2Stack className="w-5 h-5 text-white drop-shadow-md" />
+            <HiSquare2Stack className="w-5 h-5 lg:w-6 lg:h-6 text-white drop-shadow-md" />
           </div>
         </div>
 
@@ -270,7 +268,7 @@ const InstagramCommunityCard = () => {
             className="object-cover"
           />
           <div className="absolute top-2 right-2 p-1">
-            <HiSquare2Stack className="w-5 h-5 text-white drop-shadow-md" />
+            <HiSquare2Stack className="w-5 h-5 lg:w-6 lg:h-6 text-white drop-shadow-md" />
           </div>
         </div>
       </div>
@@ -345,13 +343,12 @@ export function ProductPageClient({
   ];
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1600px]">
       {/* Breadcrumb */}
-      {/* FIX 3: motion.nav -> m.nav */}
       <m.nav
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-8 text-xs tracking-[0.2em] uppercase"
+        className="mb-6 lg:mb-8 text-xs tracking-[0.2em] uppercase"
       >
         <Link
           href="/"
@@ -361,7 +358,7 @@ export function ProductPageClient({
         </Link>
         <span className="mx-3 text-white/20">/</span>
         <Link
-          href="/shop"
+          href="/product"
           className="text-white/40 hover:text-white transition-colors"
         >
           Shop
@@ -370,18 +367,17 @@ export function ProductPageClient({
         <span className="text-white">{product.name}</span>
       </m.nav>
 
-      {/* Product Grid */}
-      <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 mb-16">
+      {/* Product Grid - Enhanced Responsive */}
+      <div className="grid lg:grid-cols-2 gap-6 lg:gap-12 xl:gap-16 mb-12 lg:mb-16">
         {/* Image Gallery Column */}
-        {/* FIX 4: motion.div -> m.div */}
         <m.div
           initial={{ opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
-          className="space-y-6"
+          className="space-y-4 lg:space-y-6"
         >
           {/* Main Image */}
-          <div className="relative aspect-[3/4] bg-neutral-900 border border-white/5 overflow-hidden group">
+          <div className="relative aspect-[3/4] lg:aspect-[4/5] xl:aspect-[3/4] bg-neutral-900 border border-white/5 overflow-hidden group">
             <Image
               src={product.images[selectedImage]}
               alt={product.name}
@@ -393,7 +389,7 @@ export function ProductPageClient({
           </div>
 
           {/* Thumbnail Grid */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-4 gap-3 lg:gap-4">
             {product.images.map((img, idx) => (
               <button
                 key={idx}
@@ -414,75 +410,14 @@ export function ProductPageClient({
               </button>
             ))}
           </div>
-
-          {/* Social Proof Section */}
-          {/* FIX 5: motion.div -> m.div */}
-          <m.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="pt-4"
-          >
-            {/* Review Stars Bar */}
-            <div className="flex items-center gap-3 mb-4 pl-1">
-              <div className="flex gap-0.5">
-                {[1, 2, 3, 4].map((i) => (
-                  <HiStar key={i} className="w-4 h-4 text-white fill-current" />
-                ))}
-                <div className="relative w-4 h-4">
-                  <HiStar className="absolute inset-0 text-white/30 fill-current" />
-                  <div className="absolute inset-0 overflow-hidden w-[70%]">
-                    <HiStar className="w-4 h-4 text-white fill-current" />
-                  </div>
-                </div>
-              </div>
-              <span className="text-white font-bold text-sm">4.7</span>
-              <span className="text-[10px] tracking-[0.2em] uppercase text-white/60 font-medium ml-1">
-                BASED ON 250+ REVIEWS
-              </span>
-            </div>
-
-            {/* Shoppers Highlight Section */}
-            <div className="flex flex-row items-center gap-4 p-3 sm:p-4 rounded-xl bg-neutral-900/80 backdrop-blur-md border border-white/10 shadow-2xl relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 pointer-events-none" />
-              <div className="flex -space-x-3 rtl:space-x-reverse shrink-0 pl-1">
-                {customerAvatars.map((src, i) => (
-                  <div
-                    key={i}
-                    className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-neutral-900 overflow-hidden ring-1 ring-white/20"
-                  >
-                    <Image
-                      src={src}
-                      alt="Customer"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] sm:text-xs text-white/90 leading-relaxed">
-                  <span className="font-bold text-white">Olivia, Louise</span>
-                  <HiCheckBadge className="inline-block w-3 h-3 sm:w-4 sm:h-4 text-blue-400 mx-1 align-text-top" />
-                  <span className="text-white/60">and</span>{" "}
-                  <span className="font-bold text-white">1,305 others</span>{" "}
-                  <span className="text-white/60 block sm:inline">
-                    stylish customers, have already shopped with us in the last
-                    2 weeks.
-                  </span>
-                </p>
-              </div>
-            </div>
-          </m.div>
         </m.div>
 
-        {/* Product Info Column */}
-        {/* FIX 6: motion.div -> m.div */}
+        {/* Product Info Column - Enhanced Responsive */}
         <m.div
           initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="space-y-6"
+          className="space-y-5 lg:space-y-6 xl:space-y-7"
         >
           {/* Header Section */}
           <div className="space-y-3 sm:space-y-4">
@@ -504,22 +439,82 @@ export function ProductPageClient({
               </button>
             </div>
 
-            {/* Title */}
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
+            {/* Title - Responsive sizing */}
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-white tracking-tight leading-tight">
               {product.name}
             </h1>
 
-            {/* Price */}
-            <div className="flex items-center sm:gap-4 w-full">
-              <span className="text-lg sm:text-xl text-white/40 line-through">
+            {/* MOVED SOCIAL PROOF SECTION HERE - Below Title */}
+            <m.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="pt-2 lg:pt-3"
+            >
+              {/* Review Stars Bar */}
+              <div className="flex items-center gap-3 mb-3 lg:mb-4 pl-1">
+                <div className="flex gap-0.5">
+                  {[1, 2, 3, 4].map((i) => (
+                    <HiStar key={i} className="w-4 h-4 text-white fill-current" />
+                  ))}
+                  <div className="relative w-4 h-4">
+                    <HiStar className="absolute inset-0 text-white/30 fill-current" />
+                    <div className="absolute inset-0 overflow-hidden w-[70%]">
+                      <HiStar className="w-4 h-4 text-white fill-current" />
+                    </div>
+                  </div>
+                </div>
+                <span className="text-white font-bold text-sm">4.7</span>
+                <span className="text-[10px] tracking-[0.2em] uppercase text-white/60 font-medium ml-1">
+                  BASED ON 250+ REVIEWS
+                </span>
+              </div>
+
+              {/* Shoppers Highlight Section */}
+              <div className="flex flex-row items-center gap-3 lg:gap-4 p-3 lg:p-4 rounded-xl bg-neutral-900/80 backdrop-blur-md border border-white/10 shadow-2xl relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 pointer-events-none" />
+                <div className="flex -space-x-3 rtl:space-x-reverse shrink-0 pl-1">
+                  {customerAvatars.map((src, i) => (
+                    <div
+                      key={i}
+                      className="relative w-8 h-8 lg:w-10 lg:h-10 rounded-full border border-neutral-900 overflow-hidden ring-1 ring-white/20"
+                    >
+                      <Image
+                        src={src}
+                        alt="Customer"
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] lg:text-xs text-white/90 leading-relaxed">
+                    <span className="font-bold text-white">Olivia, Louise</span>
+                    <HiCheckBadge className="inline-block w-3 h-3 lg:w-4 lg:h-4 text-blue-400 mx-1 align-text-top" />
+                    <span className="text-white/60">and</span>{" "}
+                    <span className="font-bold text-white">1,305 others</span>{" "}
+                    <span className="text-white/60 block sm:inline">
+                      stylish customers, have already shopped with us in the last
+                      2 weeks.
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </m.div>
+            {/* END MOVED SOCIAL PROOF */}
+
+            {/* Price - Better spacing on desktop */}
+            <div className="flex items-center gap-3 lg:gap-4 w-full pt-2">
+              <span className="text-lg lg:text-xl xl:text-2xl text-white/40 line-through">
                 ${product.originalPrice}
               </span>
               {product.originalPrice && (
-                <div className="flex items-center gap-2 ml-2">
-                  <span className="text-2xl sm:text-3xl font-bold text-white">
+                <div className="flex items-center gap-2 lg:gap-3">
+                  <span className="text-2xl lg:text-3xl xl:text-4xl font-bold text-white">
                     ${product.price}
                   </span>
-                  <span className="px-2 sm:px-3 py-1 bg-red-500/20 text-red-500 text-[10px] sm:text-xs font-bold tracking-wider">
+                  <span className="px-2 lg:px-3 py-1 bg-red-500/20 text-red-500 text-[10px] lg:text-xs font-bold tracking-wider">
                     SAVE ${product.originalPrice - product.price}
                   </span>
                 </div>
@@ -527,67 +522,66 @@ export function ProductPageClient({
             </div>
 
             {/* Taxes */}
-            <p className="text-[10px] text-white/40 leading-none">
+            <p className="text-[10px] lg:text-xs text-white/40 leading-none">
               Taxes included. Shipping calculated at checkout.
             </p>
 
             {/* Flash Sale Timer */}
             {product.badge === "Flash Sale" && (
-              <div className="flex items-center gap-2 text-red-400 p-2 sm:p-4 border border-red-500/20 bg-red-500/5">
-                <IoTimeOutline className="animate-pulse text-sm sm:text-lg" />
-                <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase">
+              <div className="flex items-center gap-2 text-red-400 p-3 lg:p-4 border border-red-500/20 bg-red-500/5">
+                <IoTimeOutline className="animate-pulse text-base lg:text-lg" />
+                <span className="text-xs lg:text-sm font-bold tracking-widest uppercase">
                   Flash Sale Ends In: <CountdownTimer hours={4} />
                 </span>
               </div>
             )}
 
             {/* Size Chart Icon */}
-            <button className="flex items-center gap-2 text-xs text-white hover:text-white/80 transition-colors pt-1">
-              <HiTableCells className="w-4 h-4" />
+            <button className="flex items-center gap-2 text-xs lg:text-sm text-white hover:text-white/80 transition-colors pt-1">
+              <HiTableCells className="w-4 h-4 lg:w-5 lg:h-5" />
               <span className="underline underline-offset-4">Size Chart</span>
             </button>
 
-            {/* Benefits Section */}
-            <div className="space-y-3 pt-2">
+            {/* Benefits Section - Better spacing on desktop */}
+            <div className="space-y-3 lg:space-y-4 pt-2">
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/10 shrink-0">
-                  <HiTruck className="w-4 h-4 text-white" />
+                <div className="flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-white/10 shrink-0">
+                  <HiTruck className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
                 </div>
-                <span className="text-sm text-white/90 font-medium">
+                <span className="text-sm lg:text-base text-white/90 font-medium">
                   Free Shipping and Returns
                 </span>
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/10 shrink-0">
-                  <HiShieldCheck className="w-4 h-4 text-white" />
+                <div className="flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-white/10 shrink-0">
+                  <HiShieldCheck className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
                 </div>
-                <span className="text-sm text-white/90 font-medium">
+                <span className="text-sm lg:text-base text-white/90 font-medium">
                   30 Day Money Back Guarantee
                 </span>
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/10 shrink-0">
-                  <HiArrowsPointingIn className="w-4 h-4 text-white" />
+                <div className="flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-white/10 shrink-0">
+                  <HiArrowsPointingIn className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
                 </div>
-                <span className="text-sm text-white/90 font-medium">
+                <span className="text-sm lg:text-base text-white/90 font-medium">
                   Waist Shaping
                 </span>
               </div>
             </div>
-            {/* End Benefits Section */}
           </div>
 
           {/* Description - HIDDEN ON MOBILE */}
-          <p className="hidden sm:block text-sm text-white/60 leading-relaxed">
+          <p className="hidden sm:block text-sm lg:text-base text-white/60 leading-relaxed">
             {product.description}
           </p>
 
-          <div className="border-t border-white/10 pt-6 space-y-6">
+          <div className="border-t border-white/10 pt-5 lg:pt-6 space-y-5 lg:space-y-6">
             {/* Color Selection */}
             <div>
-              <label className="block text-xs tracking-[0.2em] uppercase text-white/60 mb-3">
+              <label className="block text-xs lg:text-sm tracking-[0.2em] uppercase text-white/60 mb-3">
                 Color:{" "}
                 <span className="text-white font-medium">{selectedColor}</span>
               </label>
@@ -596,7 +590,7 @@ export function ProductPageClient({
                   <button
                     key={color}
                     onClick={() => setSelectedColor(color)}
-                    className={`px-4 py-2 text-xs tracking-wider uppercase border transition-all ${
+                    className={`px-4 lg:px-5 py-2 lg:py-2.5 text-xs lg:text-sm tracking-wider uppercase border transition-all ${
                       selectedColor === color
                         ? "border-white bg-white text-black"
                         : "border-white/20 text-white hover:border-white/40"
@@ -611,7 +605,7 @@ export function ProductPageClient({
             {/* Size Selection */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <label className="text-xs tracking-[0.2em] uppercase text-white/60">
+                <label className="text-xs lg:text-sm tracking-[0.2em] uppercase text-white/60">
                   Size:{" "}
                   {selectedSize && (
                     <span className="text-white font-medium">
@@ -619,7 +613,7 @@ export function ProductPageClient({
                     </span>
                   )}
                 </label>
-                <button className="text-xs text-white/60 hover:text-white underline underline-offset-2">
+                <button className="text-xs lg:text-sm text-white/60 hover:text-white underline underline-offset-2">
                   Size Guide
                 </button>
               </div>
@@ -628,7 +622,7 @@ export function ProductPageClient({
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
-                    className={`py-3 text-xs tracking-wider uppercase border transition-all ${
+                    className={`py-3 lg:py-3.5 text-xs lg:text-sm tracking-wider uppercase border transition-all ${
                       selectedSize === size
                         ? "border-white bg-white text-black"
                         : "border-white/20 text-white hover:border-white/40"
@@ -641,14 +635,14 @@ export function ProductPageClient({
             </div>
 
             {/* Action Buttons Section */}
-            <div className="space-y-4 pt-4">
+            <div className="space-y-4 pt-3 lg:pt-4">
               {/* Stock Warning */}
               <div className="flex items-center gap-2">
                 <span className="relative flex h-2.5 w-2.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
                 </span>
-                <span className="text-xs sm:text-xs font-bold text-red-500 tracking-wide uppercase">
+                <span className="text-xs lg:text-sm font-bold text-red-500 tracking-wide uppercase">
                   Only a few pieces left in stock
                 </span>
               </div>
@@ -656,17 +650,17 @@ export function ProductPageClient({
               {/* Add To Cart Button */}
               <button
                 disabled={!selectedSize}
-                className="w-full py-4 bg-white text-black text-sm tracking-[0.2em] uppercase font-bold hover:bg-white/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-xl"
+                className="w-full py-4 lg:py-5 bg-white text-black text-sm lg:text-base tracking-[0.2em] uppercase font-bold hover:bg-white/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-xl"
               >
                 {selectedSize ? "Add to Cart" : "Select Size"}
               </button>
 
-              {/* Payment Icons (UPDATED: Actual Colors) */}
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+              {/* Payment Icons */}
+              <div className="flex flex-wrap items-center justify-center gap-2 lg:gap-3 pt-2">
                 {paymentIcons.map((icon) => (
                   <div
                     key={icon.name}
-                    className="h-8 w-10 relative bg-white rounded p-1 shadow-sm"
+                    className="h-7 w-9 lg:h-8 lg:w-10 relative bg-white rounded p-1 shadow-sm"
                   >
                     <img
                       src={icon.src}
@@ -681,15 +675,14 @@ export function ProductPageClient({
         </m.div>
       </div>
 
-      {/* Accordion Details Section (Replaces Tabs) */}
-      {/* FIX 7: motion.div -> m.div */}
+      {/* Accordion Details Section */}
       <m.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="mb-8 border-t border-white/10 pt-4"
+        className="mb-8 lg:mb-12 border-t border-white/10 pt-6 lg:pt-8"
       >
-        <div className="max-w-3xl">
+        <div className="max-w-4xl mx-auto">
           <AccordionItem
             title="Size Recommendation"
             isOpen={openSection === "size"}
@@ -726,7 +719,7 @@ export function ProductPageClient({
 
       {/* TRUSTED BY SECTION */}
       <section
-        className=" bg-black relative overflow-hidden mb-6 "
+        className="bg-black relative overflow-hidden mb-8 lg:mb-12"
         aria-labelledby="trusted-heading"
       >
         <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
@@ -740,30 +733,28 @@ export function ProductPageClient({
         </div>
 
         <div className="relative z-10">
-          {/* FIX 8: motion.div -> m.div */}
           <m.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-8"
+            className="text-center mb-6 lg:mb-8"
           >
             <h2
               id="trusted-heading"
-              className="text-2xl sm:text-3xl font-black text-white tracking-tight"
+              className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight"
             >
               TRUSTED <span className="font-extralight text-white/60">BY</span>
             </h2>
           </m.div>
 
-          <div className="relative overflow-hidden sm:py-6">
-            <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-20 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-8 sm:w-20 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+          <div className="relative overflow-hidden py-4 lg:py-6">
+            <div className="absolute left-0 top-0 bottom-0 w-8 lg:w-20 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-8 lg:w-20 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
 
             <div className="overflow-hidden">
-              {/* FIX 9: motion.div -> m.div */}
               <m.div
-                className="flex gap-8 sm:gap-12 lg:gap-16 items-center w-max"
+                className="flex gap-8 lg:gap-12 xl:gap-16 items-center w-max"
                 animate={{ x: [0, "-50%"] }}
                 transition={{
                   x: {
@@ -777,14 +768,14 @@ export function ProductPageClient({
                 {INFINITE_LOGOS.map((company, index) => (
                   <div
                     key={`${company.name}-${index}`}
-                    className="flex-shrink-0 relative h-10 sm:h-12 w-30 sm:w-35 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-500"
+                    className="flex-shrink-0 relative h-10 lg:h-12 xl:h-14 w-28 lg:w-32 xl:w-36 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-500"
                   >
                     <Image
                       src={company.logo}
                       alt={`${company.name} logo`}
                       fill
                       className="object-contain filter brightness-0 invert hover:scale-110 transition-transform duration-500"
-                      sizes="(max-width: 640px) 120px, 160px"
+                      sizes="(max-width: 640px) 120px, (max-width: 1024px) 140px, 160px"
                     />
                   </div>
                 ))}
@@ -794,43 +785,35 @@ export function ProductPageClient({
         </div>
       </section>
 
-      {/* JOIN OUR COMMUNITY SECTION */}
-      <div className="pb-4">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
-          {/* Left Side: Call to Action + Instagram Mockup */}
-
-          {/* Right Side: Video Carousel */}
-          <div className="w-full lg:w-2/3">
+      {/* Video Carousel + Instagram Component - Grid Layout with Proper Space Allocation */}
+      <div className="pb-6 lg:pb-8 mb-4 lg:mb-6">
+        {/* Grid container: 2 columns on desktop (60% / 40% split), 1 column on mobile */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 xl:gap-10">
+          
+          {/* Video Carousel - Left side, takes 7 columns (58.33%) */}
+          <div className="lg:col-span-7 w-full mt-6">
             <CommunityVideoCarousel />
           </div>
-        </div>
-      </div>
 
-      <div className="pb-4 mb-4">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
-          {/* Left Side: Call to Action + Instagram Mockup */}
-
-          <div className="w-full lg:w-1/3 space-y-8 ">
-            {/* The Requested Instagram Component */}
+          {/* Instagram Component - Right side, takes 5 columns (41.67%) */}
+          <div className="lg:col-span-5 w-full flex items-start justify-center lg:justify-start">
             <InstagramCommunityCard />
           </div>
+
         </div>
       </div>
 
-
-    <div className="">
+      <div className="mb-6 lg:mb-8">
         <BrandStory />
       </div>
-                   <div className="mb-4">
+      
+      <div className="mb-6 lg:mb-8">
         <TestimonialsSection />
       </div>
 
-       <div className="mb-4 mt-[-22]">
+      <div className="mb-6 lg:mb-8">
         <MustHaveProducts />
       </div>
-      
-
-
     </div>
   );
 }

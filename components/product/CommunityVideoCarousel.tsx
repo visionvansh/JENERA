@@ -143,7 +143,7 @@ export const CommunityVideoCarousel = () => {
   const getNextIndex = () => (currentIndex + 1) % COMMUNITY_VIDEOS.length;
 
   return (
-    <section className="py-6 border-t border-neutral-900 relative overflow-hidden bg-black">
+    <section className="  border-neutral-900 relative overflow-hidden bg-black">
       {/* Background Subtle Texture */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
         <div
@@ -169,14 +169,14 @@ export const CommunityVideoCarousel = () => {
             BECOME A PART OF OUR COMMUNITY
           </h2>
      
-          <p className="text-neutral-400 text-sm max-w-lg mx-auto leading-relaxed">
+          <p className="text-neutral-400 text-sm max-w-lg mx-auto leading-relaxed mb-2">
             Post a video with your order and tag us and receive a 30% discount on your next order
           </p>
         </m.div>
 
         {/* Carousel Container */}
         <div
-          className="relative h-[650px] w-full max-w-7xl mx-auto flex items-center justify-center overflow-visible mt-[-110]"
+          className="relative h-[650px] w-full max-w-7xl mx-auto flex items-center justify-center overflow-visible mt-[-86]"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
