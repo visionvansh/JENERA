@@ -1,7 +1,7 @@
 // src/components/brand/BrandStory.tsx
 "use client";
 
-import { m } from "framer-motion";
+import { m, Variants } from "framer-motion";
 import Image from "next/image";
 import { HiArrowRight, HiSparkles } from "react-icons/hi2";
 import { IoShirtOutline, IoEarthOutline } from "react-icons/io5";
@@ -17,12 +17,12 @@ const storyData = {
   secondaryImage: "/cloth28.png",
 };
 
-const mobileItemVariants = {
+const mobileItemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
-const textSlideVariants = {
+const textSlideVariants: Variants = {
   hidden: { opacity: 0, x: -30 },
   visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease: "easeOut" } },
 };
