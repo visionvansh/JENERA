@@ -51,8 +51,9 @@ export default function HomePage() {
           <MustHaveProducts />
           <ShopByCategories />
           <FeaturedCollection />
+            <TrustedBy /> 
           <BrandStory />
-          <TrustedBy /> {/* ✅ ADD HERE - After BrandStory */}
+        {/* ✅ ADD HERE - After BrandStory */}
           
           {/* <div className="hidden lg:block">
             <ProductShowcase />
