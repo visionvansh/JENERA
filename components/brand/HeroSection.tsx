@@ -24,7 +24,6 @@ interface SlideData {
   tagline: string;
   cta: string;
   image: string;
-  align: "center" | "left" | "right";
 }
 
 const HERO_SLIDES: SlideData[] = [
@@ -34,8 +33,7 @@ const HERO_SLIDES: SlideData[] = [
     subtitle: "GENESIS COLLECTION",
     tagline: "BOW TO NONE BUT ONE",
     cta: "SHOP THE DROP",
-    image: "/landscape.png", // Ensure these paths exist in your public folder
-    align: "center",
+    image: "/landscape.png", 
   },
   {
     id: 2,
@@ -44,7 +42,6 @@ const HERO_SLIDES: SlideData[] = [
     tagline: "PURITY IN DISCIPLINE",
     cta: "VIEW LOOKBOOK",
     image: "/landscape2.png",
-    align: "center",
   },
   {
     id: 3,
@@ -53,15 +50,11 @@ const HERO_SLIDES: SlideData[] = [
     tagline: "NOISE CANCELLATION",
     cta: "EXPLORE NOW",
     image: "/landscape3.png",
-    align: "center",
   },
 ];
 
 // --- Sub-Components ---
 
-/**
- * Magnetic Button: Physically pulls the cursor towards the button center
- */
 const MagneticButton = ({
   children,
   className,
@@ -108,9 +101,6 @@ const MagneticButton = ({
   );
 };
 
-/**
- * SplitText: Animates text character by character
- */
 const SplitText = ({
   text,
   className,
@@ -170,10 +160,19 @@ export function HeroSection() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // --- SCROLL PHYSICS (From your reference) ---
   const { scrollY } = useScroll();
-  const yParallax = useTransform(scrollY, [0, 1000], [0, 400]);
-  const opacityParallax = useTransform(scrollY, [0, 600], [1, 0]);
+  
+  // 1. Content fades out quickly (0px to 500px scroll)
+  const contentOpacity = useTransform(scrollY, [0, 500], [1, 0]);
+  
+  // 2. Content moves down slowly to create depth
+  const contentY = useTransform(scrollY, [0, 500], [0, 150]);
+  
+  // 3. Background Image zooms in slightly (Scale 1 -> 1.1)
+  const bgScale = useTransform(scrollY, [0, 500], [1, 1.1]);
 
+  // Mouse interaction (Optimized)
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const smoothMouseX = useSpring(mouseX, { damping: 50, stiffness: 400 });
@@ -199,59 +198,54 @@ export function HeroSection() {
   const currentData = HERO_SLIDES[currentSlide];
 
   return (
-    <m.section
+    <section
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      className="relative h-screen w-full overflow-hidden bg-[#050505] text-white selection:bg-white selection:text-black"
+      className="relative h-screen w-full overflow-hidden bg-black text-white"
     >
-      {/* PERFORMANCE OPTIMIZATION:
-         Removed the SVG Noise filter (feTurbulence). 
-         This is the biggest bottleneck for low-end devices.
-         If you want grain, use a static transparent PNG overlay instead.
-      */}
-
-      {/* 1. BACKGROUND SLIDER */}
-      <AnimatePresence initial={false} mode="popLayout">
-        <m.div
-          key={currentData.id}
-          className="absolute inset-0 z-0 will-change-transform" // Hardware acceleration hint
-          initial={{ clipPath: "inset(0 0 100% 0)" }}
-          animate={{ clipPath: "inset(0 0 0% 0)" }}
-          exit={{ clipPath: "inset(100% 0 0 0)", zIndex: 1 }}
-          transition={{ duration: 1.2, ease: [0.77, 0, 0.175, 1] }}
-        >
+      
+      {/* 1. BACKGROUND LAYER (With Scroll Scale Effect) */}
+      <m.div 
+        className="absolute inset-0 z-0 h-full w-full"
+        style={{ scale: bgScale }} // Apply the scroll zoom here
+      >
+        <AnimatePresence initial={false} mode="popLayout">
           <m.div
-            className="relative h-full w-full will-change-transform"
-            style={{ scale: 1.1 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 6, ease: "linear" }}
+            key={currentData.id}
+            className="absolute inset-0 h-full w-full will-change-transform"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2, ease: "easeInOut" }}
           >
+            {/* The Image Itself */}
             <Image
               src={currentData.image}
               alt={currentData.title}
               fill
               className="object-cover"
               priority
-              quality={85} // Reduced slightly for performance
+              quality={85}
             />
-            {/* Dark gradient overlay for text readability */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/70" />
+            
+            {/* GRADIENT OVERLAYS (Crucial for the "faded" look) */}
+            {/* Top gradient for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80" />
+            {/* General darkening */}
             <div className="absolute inset-0 bg-black/20" />
           </m.div>
-        </m.div>
-      </AnimatePresence>
+        </AnimatePresence>
+      </m.div>
 
-      {/* 2. PARALLAX FLOATING ELEMENTS (Cleaned up) */}
+      {/* 2. PARALLAX FLOATING TEXT (Background Decor) */}
       <m.div
-        className="absolute inset-0 z-10 pointer-events-none"
+        className="absolute inset-0 z-10 pointer-events-none mix-blend-overlay opacity-[0.1]"
         style={{
           x: useMotionTemplate`${smoothMouseX.get() * -20}px`,
           y: useMotionTemplate`${smoothMouseY.get() * -20}px`,
         }}
       >
-        {/* Removed Vertical Lines (Slide bars) */}
-        
-        <div className="absolute top-1/2 -translate-y-1/2 w-full overflow-hidden opacity-[0.04]">
+         <div className="absolute top-1/2 -translate-y-1/2 w-full overflow-hidden">
           <m.div
             className="whitespace-nowrap text-[20vw] font-black uppercase leading-none will-change-transform"
             animate={{ x: ["0%", "-50%"] }}
@@ -262,13 +256,17 @@ export function HeroSection() {
         </div>
       </m.div>
 
-      {/* 3. MAIN CONTENT LAYER */}
+      {/* 3. MAIN CONTENT LAYER (With Scroll Opacity & Y Axis) */}
       <m.div
         className="relative z-20 flex h-full w-full flex-col items-center justify-center px-4"
-        style={{ opacity: opacityParallax, y: yParallax }}
+        style={{ 
+          opacity: contentOpacity, 
+          y: contentY 
+        }}
       >
         <div className="relative flex flex-col items-center text-center">
           
+          {/* Tagline */}
           <div className="overflow-hidden mb-4">
             <AnimatePresence mode="wait">
               <m.div
@@ -285,6 +283,7 @@ export function HeroSection() {
             </AnimatePresence>
           </div>
 
+          {/* Main Title */}
           <div className="relative z-10 my-2 mix-blend-difference">
             <AnimatePresence mode="wait">
               <div key={currentData.title} className="overflow-hidden">
@@ -296,6 +295,7 @@ export function HeroSection() {
             </AnimatePresence>
           </div>
 
+          {/* Subtitle */}
           <div className="overflow-hidden mb-12">
              <AnimatePresence mode="wait">
               <m.div
@@ -312,6 +312,7 @@ export function HeroSection() {
              </AnimatePresence>
           </div>
 
+          {/* CTA Button */}
           <MagneticButton className="group relative z-30 inline-flex items-center gap-4 overflow-hidden rounded-full bg-white px-10 py-5 text-black transition-all hover:bg-gray-200">
             <span className="relative z-10 text-sm font-bold tracking-[0.2em] uppercase">
               {currentData.cta}
@@ -324,25 +325,33 @@ export function HeroSection() {
                  <HiArrowLongRight className="text-xl" />
                </m.div>
             </div>
+            {/* Button Hover Fill */}
             <div className="absolute inset-0 -translate-x-full bg-neutral-300 transition-transform duration-500 group-hover:translate-x-0" />
           </MagneticButton>
         </div>
       </m.div>
 
-      {/* 4. FOOTER INFO (Simplified: Removed numbers, bars, and buttons) */}
-      <div className="absolute bottom-0 left-0 right-0 z-30 flex items-end justify-center p-8 md:p-12 pointer-events-none">
+      {/* 4. BOTTOM FADE OVERLAY (Ensures smooth blend to next section) */}
+      <m.div 
+        className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent z-20 pointer-events-none"
+        style={{ opacity: contentOpacity }} 
+      />
+
+      {/* 5. FOOTER SCROLL INDICATOR */}
+      <m.div 
+        className="absolute bottom-12 left-0 right-0 z-30 flex justify-center pointer-events-none"
+        style={{ opacity: contentOpacity }}
+      >
         <m.div 
-          className="hidden md:flex flex-col items-center gap-2 opacity-60"
+          className="flex flex-col items-center gap-2 opacity-60"
           animate={{ y: [0, 10, 0] }}
           transition={{ repeat: Infinity, duration: 2 }}
         >
           <span className="text-[10px] uppercase tracking-widest writing-vertical">Scroll</span>
           <HiArrowDown />
         </m.div>
-      </div>
-      
-      {/* Removed the 4 "Lining Frame" Corner Divs */}
+      </m.div>
 
-    </m.section>
+    </section>
   );
 }
