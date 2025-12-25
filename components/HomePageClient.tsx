@@ -175,7 +175,7 @@ export default function HomePageClient({ initialDropState }: HomePageClientProps
                 Unlock <span className="text-white">15% Off</span>
               </h2>
               <p className="text-white/60 text-sm md:text-base font-light max-w-xs mx-auto leading-relaxed">
-                Join the movement. Get your exclusive code and priority access to new drops.
+               Get your exclusive code and priority access to new drops.
               </p>
             </m.div>
             <div className="w-full">
