@@ -2,8 +2,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-// IMPORT THE NEW COMPONENT
-import { Providers } from "@/components/Providers"; 
+import { Providers } from "@/components/Providers";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,18 +22,36 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
+      <head>
+        {/* Klaviyo init script */}
+        <Script id="klaviyo-init" strategy="beforeInteractive">
+          {`
+            !function(){if(!window.klaviyo){window._klOnsite=window._klOnsite||[];
+            try{window.klaviyo=new Proxy({},{
+              get:function(t,e){return"push"===e?function(){
+              var t;return(t=window._klOnsite).push.apply(t,arguments)}:void 0}})
+            }catch(t){window.klaviyo=window.klaviyo||[],
+            window.klaviyo.push=function(){var t;
+            return(t=window._klOnsite).push.apply(t,arguments)}}}}();
+          `}
+        </Script>
+
+        {/* Klaviyo main script */}
+        <Script
+          strategy="afterInteractive"
+          src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=YOUR_PUBLIC_API_KEY"
+        />
+      </head>
+
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* WRAP CHILDREN WITH PROVIDERS */}
-        <Providers>
-          {children}
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

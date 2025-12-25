@@ -12,3 +12,9 @@ export { TestimonialsSection } from "./TestimonialsSection";
 export { NewsletterSection } from "./NewsletterSection";
 export { Footer } from "./Footer";
 export { ScrollProgress } from "./ui/ScrollProgress";
+
+// src/components/drops/index.ts
+export { EmailSignupPopup } from "./EmailSignupPopup";
+
+// src/components/admin/index.ts
+export { DropToggle } from "../admin/DropToggle";

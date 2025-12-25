@@ -216,7 +216,7 @@ const InstagramCommunityCard = () => {
             </span>
             <HiCheckBadge className="w-4 h-4 lg:w-5 lg:h-5 text-blue-500" />
           </div>
-          <span className="text-[10px] lg:text-xs text-white/40">@jenera</span>
+          <span className="text-[10px] lg:text-xs text-white/40">@fearyah</span>
         </div>
       </div>
 
@@ -225,7 +225,7 @@ const InstagramCommunityCard = () => {
         {/* Square 1 */}
         <div className="relative aspect-square bg-neutral-800 rounded-sm flex items-center justify-center border border-white/5 hover:border-white/20 transition-colors cursor-pointer group">
           <Image
-            src="/cloth21.png"
+            src="/landscape.png"
             alt="Brand Logo"
             fill
             className="object-cover"
@@ -238,7 +238,7 @@ const InstagramCommunityCard = () => {
         {/* Square 2 */}
         <div className="relative aspect-square bg-neutral-800 rounded-sm flex items-center justify-center border border-white/5 hover:border-white/20 transition-colors cursor-pointer group">
           <Image
-            src="/cloth22.png"
+            src="/landscape2.png"
             alt="Brand Logo"
             fill
             className="object-cover"
@@ -250,7 +250,7 @@ const InstagramCommunityCard = () => {
 
         <div className="relative aspect-square bg-neutral-800 rounded-sm flex items-center justify-center border border-white/5 hover:border-white/20 transition-colors cursor-pointer group">
           <Image
-            src="/cloth24.png"
+            src="/landscape3.png"
             alt="Brand Logo"
             fill
             className="object-cover"
