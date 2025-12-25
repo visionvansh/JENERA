@@ -2,7 +2,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Navbar } from "@/components/Navbar";
+import { Navbar } from "@/components/brand/Navbar";
 
 export default function ContactInformation() {
   return (
