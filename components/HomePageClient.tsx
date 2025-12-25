@@ -1,11 +1,11 @@
 // components/HomePageClient.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import { LazyMotion, domAnimation, AnimatePresence, m } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { LazyMotion, domAnimation, AnimatePresence, m, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 import { HiXMark, HiArrowLongRight } from "react-icons/hi2";
-import { getDropStatus } from "@/app/actions"; // Import server action for live polling
+import { getDropStatus } from "@/app/actions";
 import {
   Navbar,
   HeroSection,
@@ -21,6 +21,56 @@ import {
   Footer,
   ScrollProgress,
 } from "@/components/brand";
+
+// --- NEW COMPONENT: CINEMATIC LOGO VIDEO (Hero-Like Smooth Scroll) ---
+const CinematicLogoVideo = () => {
+  const containerRef = useRef<HTMLElement>(null);
+  
+  // Track scroll progress relative to this specific component
+  // "start end" = when top of component hits bottom of screen
+  // "end start" = when bottom of component hits top of screen
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"],
+  });
+
+  // 1. SCALE (Zoom In): Mimics HeroSection bgScale [1, 1.1]
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
+  
+  // 2. PARALLAX (Float): Moves the video slightly within its container
+  const y = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
+  
+  // 3. OPACITY: Fades in/out at edges for smoothness
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.8, 1, 1, 0.8]);
+
+  return (
+    <section 
+      ref={containerRef} 
+      className="relative w-full h-[60vh] md:h-[90vh] overflow-hidden bg-neutral-950"
+    >
+      <m.div 
+        style={{ scale, y, opacity }} 
+        className="absolute inset-0 w-full h-[120%] -top-[10%]" // Height > 100% to allow parallax movement
+      >
+        {/* Dark Overlay for cinematic mood */}
+        <div className="absolute inset-0 bg-black/10 z-10" />
+        
+        <video
+          className="w-full h-full object-cover"
+          src="/video1.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+      </m.div>
+      
+      {/* Top and Bottom Gradients to blend seamlessly with the black page background */}
+      <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-black to-transparent z-20 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-black to-transparent z-20 pointer-events-none" />
+    </section>
+  );
+};
 
 // --- MERGED POPUP COMPONENTS ---
 
@@ -221,7 +271,13 @@ export default function HomePageClient({ initialDropState }: HomePageClientProps
               <AnimatePresence>{isPopupOpen && <PopupUI forceOpen={false} />}</AnimatePresence>
               <main id="main-content">
                 <HeroSection />
+                
+                {/* Section 1: Must Have Products
+                   Section 2: Cinematic Logo Video (New)
+                */}
                 <MustHaveProducts />
+                <CinematicLogoVideo />
+                
                 <ShopByCategories />
                 <FeaturedCollection />
                 <TrustedBy />

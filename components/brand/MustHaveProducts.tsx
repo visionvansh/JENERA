@@ -5,91 +5,64 @@ import { m } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { HiArrowRight, HiFire, HiEye } from "react-icons/hi2";
+import { HiArrowRight, HiFire } from "react-icons/hi2";
 import { IoTimeOutline } from "react-icons/io5";
+import { shopifyFetch, PRODUCTS_QUERY } from "@/lib/shopify";
 
-// ... [Helper functions and data arrays remain unchanged] ...
+// Helper function
 const getFutureDate = (hours: number) => {
   const date = new Date();
   date.setHours(date.getHours() + hours);
   return date.toISOString();
 };
 
-const MUST_HAVE_PRODUCTS = [
-  {
-    id: 1,
-    name: "Classic Wool Overcoat",
-    price: 495,
-    originalPrice: 650,
-    badge: "Best Seller",
-    image: "/cloth1.jpg",
-    category: "Outerwear",
-    inventory: 5,
-    saleEnds: getFutureDate(3),
-  },
-  {
-    id: 2,
-    name: "Cashmere Turtleneck",
-    price: 285,
-    originalPrice: 350,
-    badge: "Flash Sale",
-    image: "/cloth2.png",
-    category: "Knitwear",
+// Manual configuration for products
+// Use the product HANDLE (from URL), not the ID
+const PRODUCT_CONFIGS: Record<string, {
+  productHandle: string;
+  inventory?: number;
+  saleEnds?: string;
+  badge?: string;
+}> = {
+  "product-1": {
+    productHandle: "cinematic-hoodie",
+    inventory: 50,
     saleEnds: getFutureDate(5),
-    inventory: 4,
+    badge: "Best Seller",
+  }, 
+  "product-2": {
+    productHandle: "jesus-hoodie",
+    inventory: 5,
+    saleEnds: getFutureDate(2),
+    badge: "Best Seller",
+  }, 
 
-  },
-  {
-    id: 3,
-    name: "Tailored Wool Trousers",
-    price: 195,
-    image: "/cloth8.png",
-    category: "Bottoms",
-    inventory: 6,
-  },
-  {
-    id: 4,
-    name: "Silk Blend Shirt",
-    price: 175,
-    badge: "Limited",
-    image: "/cloth4.png",
-    category: "Tops",
-    inventory: 3,
-  },
-  {
-    id: 5,
-    name: "Silk Blend Shirt",
-    price: 175,
-    badge: "Limited",
-    image: "/cloth5.png",
-    category: "Tops",
-    inventory: 2,
+   "product-3": {
+    productHandle: "jesus-saves-hoodie",
+    inventory: 50,
+    saleEnds: getFutureDate(8),
+   
+  }, 
+  // Add more products here as needed
+};
 
-  },
-  {
-    id: 6,
-    name: "Silk Blend Shirt",
-    price: 175,
-    badge: "Limited",
-    image: "/cloth6.png",
-    category: "Tops",
-    inventory: 7,
-  },
-  {
-    id: 7,
-    name: "Silk Blend Shirt",
-    price: 175,
-    badge: "Limited",
-    image: "/cloth7.png",
-    category: "Tops",
-    inventory: 8,
-  },
-];
-
-const DESKTOP_MARQUEE_LIST = [...MUST_HAVE_PRODUCTS, ...MUST_HAVE_PRODUCTS];
+interface ShopifyProduct {
+  id: string;
+  name: string;
+  handle: string;
+  price: number;
+  originalPrice: number | null;
+  image: string;
+  category: string;
+  inventory: number | null;
+  saleEnds: string | null;
+  badge: string | null;
+  availableForSale: boolean;
+}
 
 const CountdownTimer = ({ targetDate }: { targetDate: string }) => {
   const [timeLeft, setTimeLeft] = useState("");
+  
   useEffect(() => {
     const calculateTime = () => {
       const difference = +new Date(targetDate) - +new Date();
@@ -110,13 +83,14 @@ const CountdownTimer = ({ targetDate }: { targetDate: string }) => {
     calculateTime();
     return () => clearInterval(timer);
   }, [targetDate]);
+  
   if (!timeLeft) return null;
   return <span className="tabular-nums">{timeLeft}</span>;
 };
 
-const ProductCard = ({ product }: { product: any }) => {
+const ProductCard = ({ product }: { product: ShopifyProduct }) => {
   return (
-    <Link href={`/product/${product.id}`}>
+    <Link href={`/product/${product.handle}`}>
       <article className="group cursor-pointer w-[280px] sm:w-[320px] flex-shrink-0 relative flex flex-col h-full">
         <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900 mb-4 border border-white/5">
           <Image
@@ -150,7 +124,7 @@ const ProductCard = ({ product }: { product: any }) => {
             <span className="text-[10px] tracking-[0.2em] text-white/40 uppercase">
               {product.category}
             </span>
-            {product.inventory < 10 && (
+            {product.inventory && product.inventory < 10 && (
               <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 uppercase tracking-wider animate-pulse">
                 <HiFire /> Only {product.inventory} Left
               </span>
@@ -170,13 +144,13 @@ const ProductCard = ({ product }: { product: any }) => {
                 </span>
               )}
               {product.saleEnds && (
-              <div className="flex items-center gap-1.5 text-red-400">
-                <IoTimeOutline className="animate-pulse text-sm" />
-                <span className="text-[10px] font-bold tracking-widest uppercase">
-                  Ends <CountdownTimer targetDate={product.saleEnds} />
-                </span>
-              </div>
-            )}
+                <div className="flex items-center gap-1.5 text-red-400">
+                  <IoTimeOutline className="animate-pulse text-sm" />
+                  <span className="text-[10px] font-bold tracking-widest uppercase">
+                    Ends <CountdownTimer targetDate={product.saleEnds} />
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -186,10 +160,143 @@ const ProductCard = ({ product }: { product: any }) => {
 };
 
 export function MustHaveProducts() {
+  const [products, setProducts] = useState<ShopifyProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        console.log("🔄 Fetching products from Shopify...");
+        
+        const data = await shopifyFetch<{
+          products: {
+            edges: Array<{
+              node: {
+                id: string;
+                title: string;
+                handle: string;
+                productType: string;
+                images: {
+                  edges: Array<{
+                    node: {
+                      url: string;
+                      altText: string | null;
+                    };
+                  }>;
+                };
+                priceRange: {
+                  minVariantPrice: {
+                    amount: string;
+                    currencyCode: string;
+                  };
+                };
+                compareAtPriceRange: {
+                  minVariantPrice: {
+                    amount: string;
+                    currencyCode: string;
+                  } | null;
+                };
+                availableForSale: boolean;
+                totalInventory: number;
+              };
+            }>;
+          };
+        }>({
+          query: PRODUCTS_QUERY,
+        });
+
+        if (!data?.products?.edges) {
+          setError("No products found in Shopify");
+          setLoading(false);
+          return;
+        }
+
+        console.log(`✅ Fetched ${data.products.edges.length} products from Shopify`);
+
+        const mappedProducts: ShopifyProduct[] = Object.entries(PRODUCT_CONFIGS)
+          .map(([key, config]) => {
+            const shopifyProduct = data.products.edges.find(
+              (edge) => edge.node.handle === config.productHandle
+            )?.node;
+
+            if (!shopifyProduct) {
+              console.warn(`❌ Product with handle "${config.productHandle}" not found`);
+              return null;
+            }
+
+            const price = parseFloat(shopifyProduct.priceRange.minVariantPrice.amount);
+            const compareAtPrice = shopifyProduct.compareAtPriceRange?.minVariantPrice?.amount
+              ? parseFloat(shopifyProduct.compareAtPriceRange.minVariantPrice.amount)
+              : null;
+
+            return {
+              id: shopifyProduct.id,
+              name: shopifyProduct.title,
+              handle: shopifyProduct.handle,
+              price: price,
+              originalPrice: compareAtPrice && compareAtPrice > price ? compareAtPrice : null,
+              image: shopifyProduct.images.edges[0]?.node.url || "/placeholder.jpg",
+              category: shopifyProduct.productType || "General",
+              inventory: config.inventory ?? null,
+              saleEnds: config.saleEnds ?? null,
+              badge: config.badge ?? null,
+              availableForSale: shopifyProduct.availableForSale,
+            };
+          })
+          .filter((p): p is ShopifyProduct => p !== null);
+
+        console.log(`✅ Mapped ${mappedProducts.length} products successfully`);
+        setProducts(mappedProducts);
+        
+        if (mappedProducts.length === 0) {
+          setError("No matching products found. Check your product handles in PRODUCT_CONFIGS.");
+        }
+      } catch (err) {
+        console.error("❌ Error fetching products:", err);
+        setError("Failed to load products");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // MINIMUM_PRODUCTS_FOR_MARQUEE: Only use marquee if we have at least 5 products
+  const MINIMUM_PRODUCTS_FOR_MARQUEE = 5;
+  const shouldUseMarquee = products.length >= MINIMUM_PRODUCTS_FOR_MARQUEE;
+  
+  // For marquee, duplicate the products array to create seamless loop
+  const DESKTOP_MARQUEE_LIST = shouldUseMarquee ? [...products, ...products] : products;
+
+  if (loading) {
+    return (
+      <section className="py-8 sm:py-12 lg:py-16 bg-black relative overflow-hidden">
+        <div className="container mx-auto px-4 text-center">
+          <div className="text-white/40 text-lg">Loading products...</div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error || products.length === 0) {
+    return (
+      <section className="py-8 sm:py-12 lg:py-16 bg-black relative overflow-hidden">
+        <div className="container mx-auto px-4 text-center">
+          <div className="text-red-400 text-lg mb-4">{error || "No products available"}</div>
+          <div className="text-white/40 text-sm">
+            Please check the console for more details and verify your product handles.
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section
       id="must-have"
-      className="py-8 sm:py-12 lg:py-16 bg-black relative overflow-hidden" // TIGHT PADDING
+      className="py-8 sm:py-12 lg:py-16 bg-black relative overflow-hidden"
       aria-labelledby="must-have-heading"
     >
       <style jsx global>{`
@@ -222,7 +329,7 @@ export function MustHaveProducts() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-6 sm:mb-8" // TIGHT MARGIN
+            className="text-center mb-6 sm:mb-8"
           >
             <span className="text-[10px] sm:text-xs tracking-[0.4em] text-white/40 font-light block mb-4">
               CURATED SELECTION
@@ -242,22 +349,36 @@ export function MustHaveProducts() {
         </div>
 
         <div className="w-full relative">
+          {/* Mobile: Horizontal scroll */}
           <div className="flex lg:hidden overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4 gap-4 pb-8">
-            {MUST_HAVE_PRODUCTS.map((product) => (
+            {products.map((product) => (
               <div key={product.id} className="snap-center">
                 <ProductCard product={product} />
               </div>
             ))}
           </div>
-          <div className="hidden lg:block w-full overflow-hidden pause-on-hover">
-            <div className="flex gap-8 w-max animate-marquee hover:[animation-play-state:paused]">
-              {DESKTOP_MARQUEE_LIST.map((product, index) => (
-                <div key={`${product.id}-${index}`}>
+
+          {/* Desktop: Marquee animation for 5+ products, centered grid for fewer */}
+          {shouldUseMarquee ? (
+            <div className="hidden lg:block w-full overflow-hidden pause-on-hover">
+              <div className="flex gap-8 w-max animate-marquee hover:[animation-play-state:paused]">
+                {DESKTOP_MARQUEE_LIST.map((product, index) => (
+                  <div key={`${product.id}-${index}`}>
+                    <ProductCard product={product} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            // Fewer than 5 products: centered grid display without marquee
+            <div className="hidden lg:flex justify-center items-center gap-8 px-4">
+              {products.map((product) => (
+                <div key={product.id}>
                   <ProductCard product={product} />
                 </div>
               ))}
             </div>
-          </div>
+          )}
         </div>
 
         <m.div
@@ -265,7 +386,7 @@ export function MustHaveProducts() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.5 }}
-          className="text-center mt-6 sm:mt-8 container mx-auto px-4" // TIGHT MARGIN
+          className="text-center mt-6 sm:mt-8 container mx-auto px-4"
         >
           <a
             href="/shop"
