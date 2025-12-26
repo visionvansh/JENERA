@@ -1,4 +1,4 @@
-//Volumes/vision/codes/jenara/my-app/components/product/ProductPageClient.tsx
+// src/components/product/ProductPageClient.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,28 +6,23 @@ import { m, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  HiArrowRight,
   HiHeart,
   HiOutlineHeart,
-  HiMinus,
-  HiPlus,
   HiStar,
   HiTruck,
   HiShieldCheck,
-  HiArrowPath,
-  HiFire,
   HiCheckBadge,
   HiTableCells,
   HiArrowsPointingIn,
   HiChevronDown,
-  HiPhoto,
-  HiSquare2Stack, 
+  HiSquare2Stack,
 } from "react-icons/hi2";
 import { IoTimeOutline } from "react-icons/io5";
 import { CommunityVideoCarousel } from "./CommunityVideoCarousel";
 import { TestimonialsSection } from "../brand";
 import { BrandStory } from "../brand";
 import { MustHaveProducts } from "../brand";
+import { ProductShowcase } from "../brand/ProductShowcase"; // ADDED
 
 // --- Data & Constants ---
 
@@ -92,34 +87,51 @@ const INFINITE_LOGOS = [
   ...TRUSTED_COMPANIES,
 ];
 
+interface ProductVariant {
+  id: string;
+  title: string;
+  availableForSale: boolean;
+  quantityAvailable: number;
+  price: {
+    amount: string;
+    currencyCode: string;
+  };
+  compareAtPrice: {
+    amount: string;
+    currencyCode: string;
+  } | null;
+  selectedOptions: Array<{
+    name: string;
+    value: string;
+  }>;
+}
+
 interface Product {
-  id: number;
+  id: string;
+  handle: string;
   name: string;
+  descriptionHtml: string; // ADDED
   price: number;
-  originalPrice?: number;
-  badge?: string;
+  originalPrice: number | null;
+  badge: string | null;
   images: string[];
   category: string;
   inventory: number;
-  description: string;
-  details: string[];
   sizes: string[];
   colors: string[];
-  fit: string;
-  shipping: string;
+  availableForSale: boolean;
+  variants: ProductVariant[];
+  saleEnds: string | null;
 }
 
 // --- Helper Components ---
 
-const CountdownTimer = ({ hours }: { hours: number }) => {
+const CountdownTimer = ({ targetDate }: { targetDate: string }) => {
   const [timeLeft, setTimeLeft] = useState("");
 
   useEffect(() => {
-    const targetDate = new Date();
-    targetDate.setHours(targetDate.getHours() + hours);
-
     const calculateTime = () => {
-      const difference = +targetDate - +new Date();
+      const difference = +new Date(targetDate) - +new Date();
       if (difference > 0) {
         const h = Math.floor((difference / (1000 * 60 * 60)) % 24);
         const m = Math.floor((difference / 1000 / 60) % 60);
@@ -137,7 +149,7 @@ const CountdownTimer = ({ hours }: { hours: number }) => {
     const timer = setInterval(calculateTime, 1000);
     calculateTime();
     return () => clearInterval(timer);
-  }, [hours]);
+  }, [targetDate]);
 
   if (!timeLeft) return null;
   return <span className="tabular-nums">{timeLeft}</span>;
@@ -188,18 +200,16 @@ const AccordionItem = ({
   );
 };
 
-// --- NEW COMPONENT: Instagram Style Community Card ---
+// --- Instagram Style Community Card ---
 const InstagramCommunityCard = () => {
   return (
     <div className="w-full max-w-[320px] mx-auto lg:max-w-none lg:mx-0">
-      {/* Header: Logo & Username */}
       <div className="flex items-center gap-3 mb-4">
-        {/* Instagram Gradient Ring */}
         <div className="relative w-12 h-12 lg:w-14 lg:h-14 p-[2px] rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-pink-500">
           <div className="w-full h-full rounded-full bg-black p-[2px]">
             <div className="relative w-full h-full rounded-full overflow-hidden bg-white/10">
               <Image
-                src="/logo.png"
+                src="/logo2.png"
                 alt="Brand Logo"
                 fill
                 className="object-cover"
@@ -207,12 +217,10 @@ const InstagramCommunityCard = () => {
             </div>
           </div>
         </div>
-
-        {/* Username & Blue Tick */}
         <div className="flex flex-col justify-center">
           <div className="flex items-center gap-1">
             <span className="text-sm lg:text-base font-bold text-white tracking-tight">
-              jenera
+              Fear Yah
             </span>
             <HiCheckBadge className="w-4 h-4 lg:w-5 lg:h-5 text-blue-500" />
           </div>
@@ -220,9 +228,7 @@ const InstagramCommunityCard = () => {
         </div>
       </div>
 
-      {/* Post Content: 2 Squares */}
       <div className="grid grid-cols-2 gap-2 lg:gap-3">
-        {/* Square 1 */}
         <div className="relative aspect-square bg-neutral-800 rounded-sm flex items-center justify-center border border-white/5 hover:border-white/20 transition-colors cursor-pointer group">
           <Image
             src="/landscape.png"
@@ -235,7 +241,6 @@ const InstagramCommunityCard = () => {
           </div>
         </div>
 
-        {/* Square 2 */}
         <div className="relative aspect-square bg-neutral-800 rounded-sm flex items-center justify-center border border-white/5 hover:border-white/20 transition-colors cursor-pointer group">
           <Image
             src="/landscape2.png"
@@ -262,7 +267,7 @@ const InstagramCommunityCard = () => {
 
         <div className="relative aspect-square bg-neutral-800 rounded-sm flex items-center justify-center border border-white/5 hover:border-white/20 transition-colors cursor-pointer group">
           <Image
-            src="/cloth27.png"
+            src="/cloth30.png"
             alt="Brand Logo"
             fill
             className="object-cover"
@@ -280,29 +285,27 @@ const InstagramCommunityCard = () => {
 
 export function ProductPageClient({
   product,
-  relatedProducts,
 }: {
   product: Product;
-  relatedProducts: Product[];
 }) {
+  // Debug: Log product data on client side
+  useEffect(() => {
+    console.log("=== CLIENT PRODUCT DATA ===");
+    console.log("Product:", product.name);
+    console.log("Sizes:", product.sizes);
+    console.log("Colors:", product.colors);
+    console.log("Variants:", product.variants.length);
+  }, [product]);
+
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
-  const [selectedColor, setSelectedColor] = useState(product.colors[0]);
-  const [quantity, setQuantity] = useState(1);
+  const [selectedColor, setSelectedColor] = useState(product.colors.length > 0 ? product.colors[0] : "");
   const [isFavorite, setIsFavorite] = useState(false);
-
-  // Accordion State
   const [openSection, setOpenSection] = useState<string | null>("size");
 
   const toggleSection = (section: string) => {
     setOpenSection(openSection === section ? null : section);
   };
-
-  const discount = product.originalPrice
-    ? Math.round(
-        ((product.originalPrice - product.price) / product.originalPrice) * 100
-      )
-    : 0;
 
   const customerAvatars = [
     "https://i.pravatar.cc/150?u=a042581f4e29026024d",
@@ -342,6 +345,62 @@ export function ProductPageClient({
     },
   ];
 
+  // Find the selected variant based on size and color
+  const getSelectedVariant = (): ProductVariant | null => {
+    if (!selectedSize && !selectedColor) return null;
+    
+    return product.variants.find(variant => {
+      const sizeMatch = !selectedSize || variant.selectedOptions.some(
+        opt => opt.name.toLowerCase() === 'size' && opt.value === selectedSize
+      );
+      const colorMatch = !selectedColor || variant.selectedOptions.some(
+        opt => (opt.name.toLowerCase() === 'color' || opt.name.toLowerCase() === 'colour') && opt.value === selectedColor
+      );
+      return sizeMatch && colorMatch;
+    }) || null;
+  };
+
+  const selectedVariant = getSelectedVariant();
+  const variantPrice = selectedVariant 
+    ? parseFloat(selectedVariant.price.amount) 
+    : product.price;
+  const variantCompareAtPrice = selectedVariant?.compareAtPrice 
+    ? parseFloat(selectedVariant.compareAtPrice.amount) 
+    : product.originalPrice;
+
+  // Check if a specific size is available (considering selected color)
+  const isSizeAvailable = (size: string): boolean => {
+    const variant = product.variants.find(v => {
+      const sizeMatch = v.selectedOptions.some(
+        opt => opt.name.toLowerCase() === 'size' && opt.value === size
+      );
+      const colorMatch = !selectedColor || v.selectedOptions.some(
+        opt => (opt.name.toLowerCase() === 'color' || opt.name.toLowerCase() === 'colour') && opt.value === selectedColor
+      );
+      return sizeMatch && colorMatch;
+    });
+    return variant?.availableForSale ?? true;
+  };
+
+  // Check if a specific color is available (considering selected size)
+  const isColorAvailable = (color: string): boolean => {
+    const variant = product.variants.find(v => {
+      const colorMatch = v.selectedOptions.some(
+        opt => (opt.name.toLowerCase() === 'color' || opt.name.toLowerCase() === 'colour') && opt.value === color
+      );
+      const sizeMatch = !selectedSize || v.selectedOptions.some(
+        opt => opt.name.toLowerCase() === 'size' && opt.value === selectedSize
+      );
+      return colorMatch && sizeMatch;
+    });
+    return variant?.availableForSale ?? true;
+  };
+
+  // Determine if we need size selection for add to cart
+  const needsSizeSelection = product.sizes.length > 0 && !selectedSize;
+  const needsColorSelection = product.colors.length > 0 && !selectedColor;
+  const canAddToCart = !needsSizeSelection && !needsColorSelection && product.availableForSale;
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1600px]">
       {/* Breadcrumb */}
@@ -367,7 +426,7 @@ export function ProductPageClient({
         <span className="text-white">{product.name}</span>
       </m.nav>
 
-      {/* Product Grid - Enhanced Responsive */}
+      {/* Product Grid */}
       <div className="grid lg:grid-cols-2 gap-6 lg:gap-12 xl:gap-16 mb-12 lg:mb-16">
         {/* Image Gallery Column */}
         <m.div
@@ -389,30 +448,32 @@ export function ProductPageClient({
           </div>
 
           {/* Thumbnail Grid */}
-          <div className="grid grid-cols-4 gap-3 lg:gap-4">
-            {product.images.map((img, idx) => (
-              <button
-                key={idx}
-                onClick={() => setSelectedImage(idx)}
-                className={`relative aspect-square bg-neutral-900 border overflow-hidden transition-all duration-300 ${
-                  selectedImage === idx
-                    ? "border-white"
-                    : "border-white/10 hover:border-white/30"
-                }`}
-              >
-                <Image
-                  src={img}
-                  alt={`${product.name} view ${idx + 1}`}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 25vw, 12vw"
-                />
-              </button>
-            ))}
-          </div>
+          {product.images.length > 1 && (
+            <div className="grid grid-cols-4 gap-3 lg:gap-4">
+              {product.images.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedImage(idx)}
+                  className={`relative aspect-square bg-neutral-900 border overflow-hidden transition-all duration-300 ${
+                    selectedImage === idx
+                      ? "border-white"
+                      : "border-white/10 hover:border-white/30"
+                  }`}
+                >
+                  <Image
+                    src={img}
+                    alt={`${product.name} view ${idx + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 25vw, 12vw"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </m.div>
 
-        {/* Product Info Column - Enhanced Responsive */}
+        {/* Product Info Column */}
         <m.div
           initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
@@ -421,7 +482,7 @@ export function ProductPageClient({
         >
           {/* Header Section */}
           <div className="space-y-3 sm:space-y-4">
-            {/* Category & Favorite - HIDDEN ON MOBILE */}
+            {/* Category & Favorite */}
             <div className="hidden sm:flex items-center justify-between">
               <span className="text-[10px] tracking-[0.3em] uppercase text-white/40">
                 {product.category}
@@ -439,12 +500,12 @@ export function ProductPageClient({
               </button>
             </div>
 
-            {/* Title - Responsive sizing */}
+            {/* Title */}
             <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-white tracking-tight leading-tight">
               {product.name}
             </h1>
 
-            {/* MOVED SOCIAL PROOF SECTION HERE - Below Title */}
+            {/* Social Proof Section */}
             <m.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -502,23 +563,24 @@ export function ProductPageClient({
                 </div>
               </div>
             </m.div>
-            {/* END MOVED SOCIAL PROOF */}
 
-            {/* Price - Better spacing on desktop */}
+            {/* Price */}
             <div className="flex items-center gap-3 lg:gap-4 w-full pt-2">
-              <span className="text-lg lg:text-xl xl:text-2xl text-white/40 line-through">
-                ${product.originalPrice}
-              </span>
-              {product.originalPrice && (
-                <div className="flex items-center gap-2 lg:gap-3">
-                  <span className="text-2xl lg:text-3xl xl:text-4xl font-bold text-white">
-                    ${product.price}
-                  </span>
-                  <span className="px-2 lg:px-3 py-1 bg-red-500/20 text-red-500 text-[10px] lg:text-xs font-bold tracking-wider">
-                    SAVE ${product.originalPrice - product.price}
-                  </span>
-                </div>
+              {variantCompareAtPrice && variantCompareAtPrice > variantPrice && (
+                <span className="text-lg lg:text-xl xl:text-2xl text-white/40 line-through">
+                  ${variantCompareAtPrice.toFixed(2)}
+                </span>
               )}
+              <div className="flex items-center gap-2 lg:gap-3">
+                <span className="text-2xl lg:text-3xl xl:text-4xl font-bold text-white">
+                  ${variantPrice.toFixed(2)}
+                </span>
+                {variantCompareAtPrice && variantCompareAtPrice > variantPrice && (
+                  <span className="px-2 lg:px-3 py-1 bg-red-500/20 text-red-500 text-[10px] lg:text-xs font-bold tracking-wider">
+                    SAVE ${(variantCompareAtPrice - variantPrice).toFixed(2)}
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Taxes */}
@@ -527,22 +589,24 @@ export function ProductPageClient({
             </p>
 
             {/* Flash Sale Timer */}
-            {product.badge === "Flash Sale" && (
+            {product.saleEnds && (
               <div className="flex items-center gap-2 text-red-400 p-3 lg:p-4 border border-red-500/20 bg-red-500/5">
                 <IoTimeOutline className="animate-pulse text-base lg:text-lg" />
                 <span className="text-xs lg:text-sm font-bold tracking-widest uppercase">
-                  Flash Sale Ends In: <CountdownTimer hours={4} />
+                  Sale Ends In: <CountdownTimer targetDate={product.saleEnds} />
                 </span>
               </div>
             )}
 
             {/* Size Chart Icon */}
-            <button className="flex items-center gap-2 text-xs lg:text-sm text-white hover:text-white/80 transition-colors pt-1">
-              <HiTableCells className="w-4 h-4 lg:w-5 lg:h-5" />
-              <span className="underline underline-offset-4">Size Chart</span>
-            </button>
+            {product.sizes.length > 0 && (
+              <button className="flex items-center gap-2 text-xs lg:text-sm text-white hover:text-white/80 transition-colors pt-1">
+                <HiTableCells className="w-4 h-4 lg:w-5 lg:h-5" />
+                <span className="underline underline-offset-4">Size Chart</span>
+              </button>
+            )}
 
-            {/* Benefits Section - Better spacing on desktop */}
+            {/* Benefits Section */}
             <div className="space-y-3 lg:space-y-4 pt-2">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-white/10 shrink-0">
@@ -573,86 +637,105 @@ export function ProductPageClient({
             </div>
           </div>
 
-          {/* Description - HIDDEN ON MOBILE */}
-          <p className="hidden sm:block text-sm lg:text-base text-white/60 leading-relaxed">
-            {product.description}
-          </p>
-
           <div className="border-t border-white/10 pt-5 lg:pt-6 space-y-5 lg:space-y-6">
             {/* Color Selection */}
-            <div>
-              <label className="block text-xs lg:text-sm tracking-[0.2em] uppercase text-white/60 mb-3">
-                Color:{" "}
-                <span className="text-white font-medium">{selectedColor}</span>
-              </label>
-              <div className="flex gap-3">
-                {product.colors.map((color) => (
-                  <button
-                    key={color}
-                    onClick={() => setSelectedColor(color)}
-                    className={`px-4 lg:px-5 py-2 lg:py-2.5 text-xs lg:text-sm tracking-wider uppercase border transition-all ${
-                      selectedColor === color
-                        ? "border-white bg-white text-black"
-                        : "border-white/20 text-white hover:border-white/40"
-                    }`}
-                  >
-                    {color}
-                  </button>
-                ))}
+            {product.colors.length > 0 && (
+              <div>
+                <label className="block text-xs lg:text-sm tracking-[0.2em] uppercase text-white/60 mb-3">
+                  Color:{" "}
+                  <span className="text-white font-medium">{selectedColor}</span>
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  {product.colors.map((color) => {
+                    const available = isColorAvailable(color);
+                    return (
+                      <button
+                        key={color}
+                        onClick={() => available && setSelectedColor(color)}
+                        disabled={!available}
+                        className={`px-4 lg:px-5 py-2 lg:py-2.5 text-xs lg:text-sm tracking-wider uppercase border transition-all ${
+                          selectedColor === color
+                            ? "border-white bg-white text-black"
+                            : available
+                            ? "border-white/20 text-white hover:border-white/40"
+                            : "border-white/10 text-white/30 cursor-not-allowed line-through"
+                        }`}
+                      >
+                        {color}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Size Selection */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <label className="text-xs lg:text-sm tracking-[0.2em] uppercase text-white/60">
-                  Size:{" "}
-                  {selectedSize && (
-                    <span className="text-white font-medium">
-                      {selectedSize}
-                    </span>
-                  )}
-                </label>
-                <button className="text-xs lg:text-sm text-white/60 hover:text-white underline underline-offset-2">
-                  Size Guide
-                </button>
-              </div>
-              <div className="grid grid-cols-5 gap-3">
-                {product.sizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`py-3 lg:py-3.5 text-xs lg:text-sm tracking-wider uppercase border transition-all ${
-                      selectedSize === size
-                        ? "border-white bg-white text-black"
-                        : "border-white/20 text-white hover:border-white/40"
-                    }`}
-                  >
-                    {size}
+            {product.sizes.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-xs lg:text-sm tracking-[0.2em] uppercase text-white/60">
+                    Size:{" "}
+                    {selectedSize && (
+                      <span className="text-white font-medium">
+                        {selectedSize}
+                      </span>
+                    )}
+                  </label>
+                  <button className="text-xs lg:text-sm text-white/60 hover:text-white underline underline-offset-2">
+                    Size Guide
                   </button>
-                ))}
+                </div>
+                <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
+                  {product.sizes.map((size) => {
+                    const available = isSizeAvailable(size);
+                    return (
+                      <button
+                        key={size}
+                        onClick={() => available && setSelectedSize(size)}
+                        disabled={!available}
+                        className={`py-3 lg:py-3.5 text-xs lg:text-sm tracking-wider uppercase border transition-all ${
+                          selectedSize === size
+                            ? "border-white bg-white text-black"
+                            : available
+                            ? "border-white/20 text-white hover:border-white/40"
+                            : "border-white/10 text-white/30 cursor-not-allowed line-through"
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Action Buttons Section */}
             <div className="space-y-4 pt-3 lg:pt-4">
               {/* Stock Warning */}
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
-                </span>
-                <span className="text-xs lg:text-sm font-bold text-red-500 tracking-wide uppercase">
-                  Only a few pieces left in stock
-                </span>
-              </div>
+              {product.inventory < 10 && product.inventory > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                  </span>
+                  <span className="text-xs lg:text-sm font-bold text-red-500 tracking-wide uppercase">
+                    Only {product.inventory} pieces left in stock
+                  </span>
+                </div>
+              )}
 
               {/* Add To Cart Button */}
               <button
-                disabled={!selectedSize}
+                disabled={!canAddToCart}
                 className="w-full py-4 lg:py-5 bg-white text-black text-sm lg:text-base tracking-[0.2em] uppercase font-bold hover:bg-white/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-xl"
               >
-                {selectedSize ? "Add to Cart" : "Select Size"}
+                {!product.availableForSale 
+                  ? "Sold Out" 
+                  : needsSizeSelection
+                  ? "Select Size"
+                  : needsColorSelection
+                  ? "Select Color"
+                  : "Add to Cart"}
               </button>
 
               {/* Payment Icons */}
@@ -690,7 +773,7 @@ export function ProductPageClient({
           >
             <p>
               Fits true to size. We recommend taking your normal size. The model
-              is 178cm/5'10" and is wearing a size S.
+              is 178cm/5&apos;10&quot; and is wearing a size S.
             </p>
           </AccordionItem>
 
@@ -699,7 +782,7 @@ export function ProductPageClient({
             isOpen={openSection === "shipping"}
             onClick={() => toggleSection("shipping")}
           >
-            <p>{product.shipping}</p>
+            <p>Free shipping on orders over $200.</p>
             <p className="mt-2">Standard delivery: 3-5 business days.</p>
             <p>Express delivery: 1-2 business days available at checkout.</p>
           </AccordionItem>
@@ -785,21 +868,18 @@ export function ProductPageClient({
         </div>
       </section>
 
-      {/* Video Carousel + Instagram Component - Grid Layout with Proper Space Allocation */}
+      {/* PRODUCT SHOWCASE - ADDED HERE */}
+      <ProductShowcase description={product.descriptionHtml} />
+
+      {/* Video Carousel + Instagram Component */}
       <div className="pb-6 lg:pb-8 mb-4 lg:mb-6">
-        {/* Grid container: 2 columns on desktop (60% / 40% split), 1 column on mobile */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 xl:gap-10">
-          
-          {/* Video Carousel - Left side, takes 7 columns (58.33%) */}
           <div className="lg:col-span-7 w-full mt-6">
             <CommunityVideoCarousel />
           </div>
-
-          {/* Instagram Component - Right side, takes 5 columns (41.67%) */}
           <div className="lg:col-span-5 w-full flex items-start justify-center lg:justify-start">
             <InstagramCommunityCard />
           </div>
-
         </div>
       </div>
 

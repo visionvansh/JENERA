@@ -8,43 +8,7 @@ import { useEffect, useState } from "react";
 import { HiArrowRight, HiFire } from "react-icons/hi2";
 import { IoTimeOutline } from "react-icons/io5";
 import { shopifyFetch, PRODUCTS_QUERY } from "@/lib/shopify";
-
-// Helper function
-const getFutureDate = (hours: number) => {
-  const date = new Date();
-  date.setHours(date.getHours() + hours);
-  return date.toISOString();
-};
-
-// Manual configuration for products
-// Use the product HANDLE (from URL), not the ID
-const PRODUCT_CONFIGS: Record<string, {
-  productHandle: string;
-  inventory?: number;
-  saleEnds?: string;
-  badge?: string;
-}> = {
-  "product-1": {
-    productHandle: "cinematic-hoodie",
-    inventory: 50,
-    saleEnds: getFutureDate(5),
-    badge: "Best Seller",
-  }, 
-  "product-2": {
-    productHandle: "jesus-hoodie",
-    inventory: 5,
-    saleEnds: getFutureDate(2),
-    badge: "Best Seller",
-  }, 
-
-   "product-3": {
-    productHandle: "jesus-saves-hoodie",
-    inventory: 50,
-    saleEnds: getFutureDate(8),
-   
-  }, 
-  // Add more products here as needed
-};
+import { PRODUCT_CONFIGS } from "@/lib/productConfig";
 
 interface ShopifyProduct {
   id: string;
@@ -92,7 +56,7 @@ const ProductCard = ({ product }: { product: ShopifyProduct }) => {
   return (
     <Link href={`/product/${product.handle}`}>
       <article className="group cursor-pointer w-[280px] sm:w-[320px] flex-shrink-0 relative flex flex-col h-full">
-        <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900 mb-4 border border-white/5">
+        <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900 border border-white/5">
           <Image
             src={product.image}
             alt={product.name}
@@ -214,14 +178,15 @@ export function MustHaveProducts() {
 
         console.log(`✅ Fetched ${data.products.edges.length} products from Shopify`);
 
+        // Map configured products with Shopify data
         const mappedProducts: ShopifyProduct[] = Object.entries(PRODUCT_CONFIGS)
-          .map(([key, config]) => {
+          .map(([handle, config]) => {
             const shopifyProduct = data.products.edges.find(
               (edge) => edge.node.handle === config.productHandle
             )?.node;
 
             if (!shopifyProduct) {
-              console.warn(`❌ Product with handle "${config.productHandle}" not found`);
+              console.warn(`❌ Product with handle "${config.productHandle}" not found in Shopify`);
               return null;
             }
 
@@ -263,11 +228,8 @@ export function MustHaveProducts() {
     fetchProducts();
   }, []);
 
-  // MINIMUM_PRODUCTS_FOR_MARQUEE: Only use marquee if we have at least 5 products
   const MINIMUM_PRODUCTS_FOR_MARQUEE = 5;
   const shouldUseMarquee = products.length >= MINIMUM_PRODUCTS_FOR_MARQUEE;
-  
-  // For marquee, duplicate the products array to create seamless loop
   const DESKTOP_MARQUEE_LIST = shouldUseMarquee ? [...products, ...products] : products;
 
   if (loading) {
@@ -349,7 +311,6 @@ export function MustHaveProducts() {
         </div>
 
         <div className="w-full relative">
-          {/* Mobile: Horizontal scroll */}
           <div className="flex lg:hidden overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4 gap-4 pb-8">
             {products.map((product) => (
               <div key={product.id} className="snap-center">
@@ -358,7 +319,6 @@ export function MustHaveProducts() {
             ))}
           </div>
 
-          {/* Desktop: Marquee animation for 5+ products, centered grid for fewer */}
           {shouldUseMarquee ? (
             <div className="hidden lg:block w-full overflow-hidden pause-on-hover">
               <div className="flex gap-8 w-max animate-marquee hover:[animation-play-state:paused]">
@@ -370,7 +330,6 @@ export function MustHaveProducts() {
               </div>
             </div>
           ) : (
-            // Fewer than 5 products: centered grid display without marquee
             <div className="hidden lg:flex justify-center items-center gap-8 px-4">
               {products.map((product) => (
                 <div key={product.id}>
