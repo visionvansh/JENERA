@@ -282,7 +282,6 @@ export default function HomePageClient({ initialDropState }: HomePageClientProps
                 <FeaturedCollection />
                 <TrustedBy />
                 <BrandStory />
-                <div className="hidden lg:block"><ProductShowcase /></div>
                 <div className="hidden lg:block"><LookbookSection /></div>
                 <TestimonialsSection />
                 <NewsletterSection />
