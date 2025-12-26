@@ -18,120 +18,23 @@ import {
   HiFire 
 } from "react-icons/hi2";
 import { IoTimeOutline } from "react-icons/io5";
+import { shopifyFetch, PRODUCTS_QUERY } from "@/lib/shopify";
+import { PRODUCT_CONFIGS } from "@/lib/productConfig";
 
-// --- Helper Functions ---
-const getFutureDate = (hours: number) => {
-  const date = new Date();
-  date.setHours(date.getHours() + hours);
-  return date.toISOString();
-};
-
-// --- Mock Data with Urgency Fields ---
-const ALL_PRODUCTS = [
-  {
-    id: 1,
-    name: "Classic Wool Overcoat",
-    price: 495,
-    originalPrice: 650,
-    badge: "Best Seller",
-    image: "/cloth1.jpg",
-    category: "Outerwear",
-    inventory: 5,
-    saleEnds: getFutureDate(3),
-  },
-  {
-    id: 2,
-    name: "Cashmere Turtleneck",
-    price: 285,
-    originalPrice: 350,
-    badge: "Flash Sale",
-    image: "/cloth2.png",
-    category: "Knitwear",
-    inventory: 4,
-    saleEnds: getFutureDate(5),
-  },
-  {
-    id: 3,
-    name: "Tailored Wool Trousers",
-    price: 195,
-    originalPrice: 245,
-    image: "/cloth8.png",
-    category: "Bottoms",
-    inventory: 6,
-    saleEnds: getFutureDate(8),
-  },
-  {
-    id: 4,
-    name: "Silk Blend Shirt",
-    price: 175,
-    badge: "Limited",
-    image: "/cloth4.png",
-    category: "Tops",
-    inventory: 3,
-  },
-  {
-    id: 5,
-    name: "Essential Oversized Tee",
-    price: 89,
-    originalPrice: 110,
-    image: "/cloth16.png",
-    category: "Tops",
-    inventory: 4,
-    saleEnds: getFutureDate(2),
-  },
-  {
-    id: 6,
-    name: "Structured Wool Blazer",
-    price: 329,
-    originalPrice: 420,
-    badge: "Best Seller",
-    image: "/cloth17.png",
-    category: "Outerwear",
-    inventory: 15,
-    saleEnds: getFutureDate(6),
-  },
-  {
-    id: 7,
-    name: "Merino Knit Sweater",
-    price: 219,
-    originalPrice: 280,
-    badge: "Flash Deal",
-    image: "/cloth19.png",
-    category: "Knitwear",
-    inventory: 8,
-    saleEnds: getFutureDate(4),
-  },
-  {
-    id: 8,
-    name: "Canvas Utility Jacket",
-    price: 279,
-    originalPrice: 350,
-    image: "/cloth20.png",
-    category: "Outerwear",
-    inventory: 2,
-    saleEnds: getFutureDate(1),
-  },
-  {
-    id: 9,
-    name: "Relaxed Fit Shirt",
-    price: 129,
-    image: "/cloth21.png",
-    category: "Tops",
-    inventory: 20,
-  },
-  {
-    id: 10,
-    name: "Linen Blend Overshirt",
-    price: 145,
-    originalPrice: 180,
-    image: "/cloth22.png",
-    category: "Shirts",
-    inventory: 12,
-    saleEnds: getFutureDate(7),
-  },
-];
-
-const CATEGORIES = ["All", "Outerwear", "Knitwear", "Tops", "Bottoms", "Shirts"];
+// --- Types ---
+interface ShopifyProduct {
+  id: string;
+  name: string;
+  handle: string;
+  price: number;
+  originalPrice: number | null;
+  image: string;
+  category: string;
+  inventory: number | null;
+  saleEnds: string | null;
+  badge: string | null;
+  availableForSale: boolean;
+}
 
 // --- Countdown Timer Component ---
 const CountdownTimer = ({ targetDate }: { targetDate: string }) => {
@@ -167,11 +70,11 @@ const ProductCard = ({
   product, 
   index 
 }: { 
-  product: typeof ALL_PRODUCTS[0], 
+  product: ShopifyProduct, 
   index: number 
 }) => {
   return (
-    <Link href={`/product/${product.id}`} className="block h-full">
+    <Link href={`/product/${product.handle}`} className="block h-full">
       <m.article
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -202,8 +105,14 @@ const ProductCard = ({
 
           {/* Quick Add Button */}
           <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 z-20 hidden sm:block">
-            <button className="w-full py-3 bg-white text-black text-xs tracking-[0.2em] uppercase font-bold hover:bg-neutral-200 transition-colors shadow-xl">
-              Quick View
+            <button 
+              onClick={(e) => {
+                e.preventDefault();
+                // Add to cart logic here
+              }}
+              className="w-full py-3 bg-white text-black text-xs tracking-[0.2em] uppercase font-bold hover:bg-neutral-200 transition-colors shadow-xl"
+            >
+              Add to Bag
             </button>
           </div>
 
@@ -220,7 +129,7 @@ const ProductCard = ({
             <span className="text-[10px] tracking-[0.2em] text-white/40 uppercase">
               {product.category}
             </span>
-            {product.inventory < 10 && (
+            {product.inventory !== null && product.inventory < 10 && (
               <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 uppercase tracking-wider animate-pulse whitespace-nowrap">
                 <HiFire /> Only {product.inventory} Left
               </span>
@@ -261,13 +170,155 @@ const ProductCard = ({
 
 // --- Main Component ---
 export default function ProductListingPage() {
+  const [products, setProducts] = useState<ShopifyProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [categories, setCategories] = useState<string[]>(["All"]);
+
+  // Fetch products from Shopify
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        console.log("🔄 Fetching products from Shopify...");
+        
+        const data = await shopifyFetch<{
+          products: {
+            edges: Array<{
+              node: {
+                id: string;
+                title: string;
+                handle: string;
+                productType: string;
+                images: {
+                  edges: Array<{
+                    node: {
+                      url: string;
+                      altText: string | null;
+                    };
+                  }>;
+                };
+                priceRange: {
+                  minVariantPrice: {
+                    amount: string;
+                    currencyCode: string;
+                  };
+                };
+                compareAtPriceRange: {
+                  minVariantPrice: {
+                    amount: string;
+                    currencyCode: string;
+                  } | null;
+                };
+                availableForSale: boolean;
+                totalInventory: number;
+              };
+            }>;
+          };
+        }>({
+          query: PRODUCTS_QUERY,
+        });
+
+        if (!data?.products?.edges) {
+          setError("No products found in Shopify");
+          setLoading(false);
+          return;
+        }
+
+        console.log(`✅ Fetched ${data.products.edges.length} products from Shopify`);
+
+        // Map ALL Shopify products with static data if available
+        const mappedProducts: ShopifyProduct[] = data.products.edges
+          .map((edge) => {
+            const shopifyProduct = edge.node;
+            const staticConfig = PRODUCT_CONFIGS[shopifyProduct.handle];
+
+            const price = parseFloat(shopifyProduct.priceRange.minVariantPrice.amount);
+            const compareAtPrice = shopifyProduct.compareAtPriceRange?.minVariantPrice?.amount
+              ? parseFloat(shopifyProduct.compareAtPriceRange.minVariantPrice.amount)
+              : null;
+
+            return {
+              id: shopifyProduct.id,
+              name: shopifyProduct.title,
+              handle: shopifyProduct.handle,
+              price: price,
+              originalPrice: compareAtPrice && compareAtPrice > price ? compareAtPrice : null,
+              image: shopifyProduct.images.edges[0]?.node.url || "/placeholder.jpg",
+              category: shopifyProduct.productType || "General",
+              inventory: staticConfig?.inventory ?? null,
+              saleEnds: staticConfig?.saleEnds ?? null,
+              badge: staticConfig?.badge ?? null,
+              availableForSale: shopifyProduct.availableForSale,
+            };
+          })
+          .filter((p): p is ShopifyProduct => p !== null);
+
+        console.log(`✅ Mapped ${mappedProducts.length} products successfully`);
+        setProducts(mappedProducts);
+
+        // Extract unique categories
+        const uniqueCategories = Array.from(
+          new Set(mappedProducts.map(p => p.category).filter(Boolean))
+        ).sort();
+        setCategories(["All", ...uniqueCategories]);
+
+        if (mappedProducts.length === 0) {
+          setError("No products available at the moment.");
+        }
+      } catch (err) {
+        console.error("❌ Error fetching products:", err);
+        setError("Failed to load products. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   // Filter Logic
   const filteredProducts = selectedCategory === "All" 
-    ? ALL_PRODUCTS 
-    : ALL_PRODUCTS.filter(p => p.category === selectedCategory);
+    ? products 
+    : products.filter(p => p.category === selectedCategory);
+
+  // Loading State
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <ScrollProgress />
+        <main className="min-h-screen bg-black text-white flex items-center justify-center pt-24">
+          <div className="text-center">
+            <div className="inline-block w-12 h-12 border-2 border-white/20 border-t-white rounded-full animate-spin mb-4" />
+            <p className="text-white/40 text-sm tracking-wider">Loading products...</p>
+          </div>
+        </main>
+      </>
+    );
+  }
+
+  // Error State
+  if (error || products.length === 0) {
+    return (
+      <>
+        <Navbar />
+        <ScrollProgress />
+        <main className="min-h-screen bg-black text-white flex items-center justify-center pt-24">
+          <div className="text-center max-w-md mx-auto px-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-500/10 mb-4">
+              <HiFunnel className="text-2xl text-red-400" />
+            </div>
+            <p className="text-red-400 text-lg mb-2">{error || "No products available"}</p>
+            <p className="text-white/40 text-sm">
+              Please check back later or contact support if the problem persists.
+            </p>
+          </div>
+        </main>
+      </>
+    );
+  }
 
   return (
     <>
@@ -311,8 +362,8 @@ export default function ProductListingPage() {
               className="flex items-center gap-4"
             >
               {/* Desktop Category Tabs */}
-              <div className="hidden md:flex items-center gap-2 bg-neutral-900/50 p-1 rounded-sm border border-white/5">
-                {CATEGORIES.map((cat) => (
+              <div className="hidden md:flex items-center gap-2 bg-neutral-900/50 p-1 rounded-sm border border-white/5 flex-wrap">
+                {categories.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
@@ -336,7 +387,7 @@ export default function ProductListingPage() {
                 <span>Filter</span>
               </button>
 
-              {/* Sort Button */}
+              {/* Sort Button (placeholder for future implementation) */}
               <button className="flex items-center gap-2 px-4 py-3 border border-white/20 text-xs tracking-widest uppercase hover:bg-white hover:text-black transition-all">
                 <span>Sort</span>
                 <HiChevronDown />
@@ -354,7 +405,7 @@ export default function ProductListingPage() {
                 className="md:hidden overflow-hidden mb-8"
               >
                 <div className="grid grid-cols-2 gap-2 pb-4">
-                  {CATEGORIES.map((cat) => (
+                  {categories.map((cat) => (
                     <button
                       key={cat}
                       onClick={() => {
@@ -377,7 +428,7 @@ export default function ProductListingPage() {
 
           {/* Results Count */}
           <div className="mb-6 text-[10px] tracking-[0.2em] text-white/40 uppercase">
-            Showing {filteredProducts.length} Products
+            Showing {filteredProducts.length} Product{filteredProducts.length !== 1 ? 's' : ''}
           </div>
 
           {/* Product Grid */}
@@ -395,7 +446,7 @@ export default function ProductListingPage() {
               <p className="text-white/60 text-sm tracking-wide">No products found in this category.</p>
               <button 
                 onClick={() => setSelectedCategory("All")}
-                className="mt-6 text-xs underline underline-offset-4 text-white hover:text-white/70"
+                className="mt-6 text-xs underline underline-offset-4 text-white hover:text-white/70 transition-colors"
               >
                 Clear Filters
               </button>

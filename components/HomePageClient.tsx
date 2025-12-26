@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { LazyMotion, domAnimation, AnimatePresence, m, useScroll, useTransform } from "framer-motion";
+import { LazyMotion, domAnimation, AnimatePresence, m, useScroll, useTransform, domMax } from "framer-motion";
 import Image from "next/image";
 import { HiXMark, HiArrowLongRight } from "react-icons/hi2";
 import { getDropStatus } from "@/app/actions";
@@ -256,7 +256,7 @@ export default function HomePageClient({ initialDropState }: HomePageClientProps
   );
 
   return (
-    <LazyMotion features={domAnimation} strict>
+    <LazyMotion features={domMax} strict>
       <div className="fixed inset-0 bg-black -z-20" />
       <div suppressHydrationWarning className="contents">
         <AnimatePresence mode="wait" initial={false}>
@@ -279,10 +279,9 @@ export default function HomePageClient({ initialDropState }: HomePageClientProps
                 <CinematicLogoVideo />
                 
                 <ShopByCategories />
-                <FeaturedCollection />
+                {/* <FeaturedCollection /> */}
                 <TrustedBy />
                 <BrandStory />
-                <div className="hidden lg:block"><LookbookSection /></div>
                 <TestimonialsSection />
                 <NewsletterSection />
               </main>

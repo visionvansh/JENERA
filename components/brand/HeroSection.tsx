@@ -34,7 +34,7 @@ const HERO_SLIDES: SlideData[] = [
     subtitle: "GENESIS COLLECTION",
     tagline: "BOW TO NONE BUT ONE",
     cta: "SHOP THE DROP",
-    image: "/landscape.png", // Ensure these paths exist in your public folder
+    image: "/landscape6.png",
     align: "center",
   },
   {
@@ -59,9 +59,6 @@ const HERO_SLIDES: SlideData[] = [
 
 // --- Sub-Components ---
 
-/**
- * Magnetic Button: Physically pulls the cursor towards the button center
- */
 const MagneticButton = ({
   children,
   className,
@@ -108,9 +105,6 @@ const MagneticButton = ({
   );
 };
 
-/**
- * SplitText: Animates text character by character
- */
 const SplitText = ({
   text,
   className,
@@ -172,12 +166,9 @@ export function HeroSection() {
 
   const { scrollY } = useScroll();
   
-  // ADJUSTED PHYSICS: Matches the "Black Faded" reference
-  // 1. Content moves down slightly (Float)
+  // ADJUSTED PHYSICS
   const yParallax = useTransform(scrollY, [0, 500], [0, 150]); 
-  // 2. Content fades out completely by 500px scroll
   const opacityParallax = useTransform(scrollY, [0, 500], [1, 0]); 
-  // 3. Background scales UP (Zoom in) as you scroll
   const bgScale = useTransform(scrollY, [0, 500], [1, 1.1]);
 
   const mouseX = useMotionValue(0);
@@ -210,9 +201,7 @@ export function HeroSection() {
       onMouseMove={handleMouseMove}
       className="relative h-screen w-full overflow-hidden bg-[#050505] text-white selection:bg-white selection:text-black"
     >
-      {/* 1. BACKGROUND SLIDER 
-         Wrapped in m.div with style={{ scale: bgScale }} for the scroll zoom effect 
-      */}
+      {/* 1. BACKGROUND SLIDER */}
       <m.div className="absolute inset-0 z-0" style={{ scale: bgScale }}>
         <AnimatePresence initial={false} mode="popLayout">
           <m.div
@@ -223,8 +212,13 @@ export function HeroSection() {
             exit={{ clipPath: "inset(100% 0 0 0)", zIndex: 1 }}
             transition={{ duration: 1.2, ease: [0.77, 0, 0.175, 1] }}
           >
+            {/* CINEMATIC COLOR CONFIGURATION:
+              - saturate-[1.15]: Makes colors pop without looking fake.
+              - contrast-[1.1]: Adds definition to shadows and highlights.
+              - No brightness reduction to keep it bright.
+            */}
             <m.div
-              className="relative h-full w-full will-change-transform"
+              className="relative h-full w-full will-change-transform filter saturate-[1.15] contrast-[1.1]"
               style={{ scale: 1.1 }}
               animate={{ scale: 1 }}
               transition={{ duration: 6, ease: "linear" }}
@@ -237,8 +231,20 @@ export function HeroSection() {
                 priority
                 quality={85}
               />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/70" />
-              <div className="absolute inset-0 bg-black/20" />
+              
+              {/* LAYER 1: The "Cinematic Tint" (Red/Brown Overlay) 
+                  Reduced opacity to 10% (bg-red-950/10) to keep it from getting too dark/heavy 
+              */}
+              <div className="absolute inset-0 z-10 bg-red-950/10 mix-blend-overlay pointer-events-none" />
+
+              {/* LAYER 2: Vignette
+                  Darkens ONLY the edges to focus eyes on center text/subject. Center remains bright. 
+              */}
+              <div className="absolute inset-0 z-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-transparent to-black/60 pointer-events-none" />
+
+              {/* LAYER 3: Readability Gradient (Top/Bottom fade) */}
+              <div className="absolute inset-0 z-20 bg-gradient-to-b from-black/30 via-transparent to-black/60 pointer-events-none" />
+              
             </m.div>
           </m.div>
         </AnimatePresence>
@@ -313,7 +319,7 @@ export function HeroSection() {
              </AnimatePresence>
           </div>
 
-          <MagneticButton className="group relative z-30 inline-flex items-center gap-4 overflow-hidden rounded-full bg-white px-10 py-5 text-black transition-all hover:bg-gray-200">
+          <MagneticButton className="group relative z-30 inline-flex items-center gap-4 overflow-hidden rounded-full bg-white px-10 py-5 text-black transition-all hover:bg-gray-200 shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:shadow-[0_0_50px_rgba(255,255,255,0.5)]">
             <span className="relative z-10 text-sm font-bold tracking-[0.2em] uppercase">
               {currentData.cta}
             </span>
@@ -334,7 +340,7 @@ export function HeroSection() {
       <div className="absolute bottom-0 left-0 right-0 z-30 flex items-end justify-center p-8 md:p-12 pointer-events-none">
         <m.div 
           className="hidden md:flex flex-col items-center gap-2 opacity-60"
-          style={{ opacity: opacityParallax }} // Fade out footer on scroll too
+          style={{ opacity: opacityParallax }}
           animate={{ y: [0, 10, 0] }}
           transition={{ repeat: Infinity, duration: 2 }}
         >

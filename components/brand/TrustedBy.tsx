@@ -1,4 +1,3 @@
-// src/components/brand/TrustedBy.tsx
 "use client";
 
 import { m } from "framer-motion";
@@ -14,7 +13,6 @@ const TRUSTED_COMPANIES = [
   { name: "Bloomingdale's", logo: "https://upload.wikimedia.org/wikipedia/commons/6/68/Bloomingdale%27s_Logo.svg" },
   { name: "Neiman Marcus", logo: "https://upload.wikimedia.org/wikipedia/commons/1/10/Neiman_Marcus_logo_black.svg" },
   { name: "Farfetch", logo: "https://upload.wikimedia.org/wikipedia/commons/a/ae/Farfetch_logo_2020.svg" },
-
   { name: "Macy's", logo: "https://upload.wikimedia.org/wikipedia/commons/a/a6/Macy%27s_logo.svg" },
   { name: "Galeries Lafayette", logo: "/logouse.png" },
   { name: "Barneys New York", logo: "https://upload.wikimedia.org/wikipedia/commons/6/67/Barneys_New_York_Logo.svg" },
@@ -61,51 +59,46 @@ export function TrustedBy() {
             TRUSTED
             <span className="font-extralight text-white/60 ml-2 sm:ml-3">BY</span>
           </h2>
-
         </m.div>
 
         {/* Infinite Scrolling Logos */}
-        <div className="relative overflow-hidden sm:py-6">
+        <div className="relative overflow-hidden py-4 lg:py-6">
           {/* Gradient Overlays */}
           <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-20 md:w-32 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
           <div className="absolute right-0 top-0 bottom-0 w-8 sm:w-20 md:w-32 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
 
           {/* Scrolling Container */}
-          <div className="overflow-hidden">
+          <div className="overflow-hidden flex">
             <m.div
               className="flex gap-8 sm:gap-12 lg:gap-16 items-center w-max"
-              animate={{
-                x: [0, "-50%"],
-              }}
+              // FIX: Use strings for both values to ensure interpolation works
+              // FIX: Move -33.33% (1/3rd) because you have 3 sets of logos. 
+              // Moving 50% would cause a visual jump on reset.
+              animate={{ x: ["0%", "-33.33%"] }}
               transition={{
-                x: {
-                  duration: 40,
-                  repeat: Infinity,
-                  ease: "linear",
-                  repeatType: "loop",
-                },
+                duration: 40,
+                repeat: Infinity,
+                ease: "linear",
+                repeatType: "loop",
               }}
             >
               {INFINITE_LOGOS.map((company, index) => (
                 <div
                   key={`${company.name}-${index}`}
-                  className="flex-shrink-0 relative h-10 sm:h-12 lg:h-14 w-30 sm:w-35 lg:w-40 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-500"
+                  className="flex-shrink-0 relative h-10 sm:h-12 lg:h-14 w-28 sm:w-32 lg:w-36 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-500"
                 >
                   <Image
                     src={company.logo}
                     alt={`${company.name} logo`}
                     fill
                     className="object-contain filter brightness-0 invert hover:scale-110 transition-transform duration-500"
-                    sizes="(max-width: 640px) 120px, (max-width: 1024px) 140px, 160px"
+                    sizes="(max-width: 640px) 112px, (max-width: 768px) 128px, 144px"
                   />
                 </div>
               ))}
             </m.div>
           </div>
         </div>
-
-        {/* Bottom Stats */}
-        
       </div>
     </section>
   );

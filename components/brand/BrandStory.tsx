@@ -1,242 +1,237 @@
 // src/components/brand/BrandStory.tsx
 "use client";
 
-import { m, Variants } from "framer-motion";
-import Image from "next/image";
-import { HiArrowRight, HiSparkles } from "react-icons/hi2";
-import { IoShirtOutline, IoEarthOutline } from "react-icons/io5";
+import { useRef, useState } from "react";
+import { 
+  m, 
+  useScroll, 
+  useTransform, 
+} from "framer-motion";
+import { HiArrowLongRight, HiSpeakerXMark, HiSpeakerWave, HiQrCode } from "react-icons/hi2";
 
-const storyData = {
-  heading: "ABOUT US",
-  subheading: "Crafting Elegance",
-  description: "Our clothing line combines trendy styles with unparalleled comfort and quality, perfect for every occasion.",
-  stat1: { value: "100%", label: "Sustainable Sourcing" },
-  stat2: { value: "50+", label: "Global Cities" },
-  stat3: { value: "10K+", label: "Happy Customers" },
-  heroImage: "/cloth26.png",
-  secondaryImage: "/cloth28.png",
+// --- SUB-COMPONENT: AUDIO VISUALIZER BARS ---
+const AudioBars = () => {
+  return (
+    <div className="flex items-end gap-[2px] h-3">
+      {[...Array(4)].map((_, i) => (
+        <m.div
+          key={i}
+          className="w-[2px] bg-red-500"
+          animate={{ height: ["20%", "100%", "40%"] }}
+          transition={{
+            duration: 0.5 + Math.random() * 0.5,
+            repeat: Infinity,
+            repeatType: "reverse",
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </div>
+  );
 };
 
-const mobileItemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
-};
+// --- SUB-COMPONENT: DECORATIVE BARCODE ---
+const Barcode = () => (
+  <div className="flex items-stretch h-8 gap-[2px] opacity-40">
+    {[2, 1, 3, 1, 4, 1, 2, 3, 1, 2, 4, 1, 2].map((w, i) => (
+      <div key={i} className="bg-white" style={{ width: `${w}px` }} />
+    ))}
+  </div>
+);
 
-const textSlideVariants: Variants = {
-  hidden: { opacity: 0, x: -30 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease: "easeOut" } },
+// --- SUB-COMPONENT: BACKGROUND MARQUEE ---
+const MarqueeText = ({ text, direction = 1, speed = 25 }: { text: string, direction?: number, speed?: number }) => {
+  return (
+    <div className="flex overflow-hidden select-none opacity-[0.03] pointer-events-none z-0 mix-blend-plus-lighter">
+      <m.div
+        className="flex whitespace-nowrap"
+        animate={{ x: direction === 1 ? ["0%", "-50%"] : ["-50%", "0%"] }}
+        transition={{ duration: speed, ease: "linear", repeat: Infinity }}
+      >
+        {[...Array(4)].map((_, i) => (
+          <span key={i} className="text-[12vh] md:text-[18vw] font-black uppercase leading-none tracking-tighter text-white mr-16">
+            {text}
+          </span>
+        ))}
+      </m.div>
+    </div>
+  );
 };
 
 export function BrandStory() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isMuted, setIsMuted] = useState(true);
+
+  // --- SCROLL PARALLAX ---
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"],
+  });
+  
+  // Refined Parallax: Subtle movement to keep them connected
+  const yContent = useTransform(scrollYProgress, [0, 1], [30, -30]);
+
+  const toggleAudio = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(!isMuted);
+    }
+  };
+
   return (
     <section 
-      id="about" 
-      className="py-8 sm:py-12 lg:py-16 bg-neutral-950 relative overflow-hidden" // TIGHT PADDING
-      aria-labelledby="about-heading"
+      ref={containerRef}
+      className="relative min-h-[90vh] lg:min-h-screen bg-black overflow-hidden flex items-center py-16 lg:py-0"
     >
-      <div className="absolute inset-0 opacity-[0.015]">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
-            backgroundSize: "60px 60px",
-          }}
-        />
+      {/* GLOBAL NOISE FILTER */}
+      <div className="absolute inset-0 z-50 pointer-events-none opacity-[0.05] mix-blend-overlay">
+         <div className="w-full h-full bg-[url('/noise.png')] animate-pulse" />
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <m.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.8 }}
-          className="" // TIGHT MARGIN
-        >
-        
-        
-        </m.div>
+      {/* BACKGROUND TYPOGRAPHY LAYERS */}
+      <div className="absolute inset-0 flex flex-col justify-center gap-20 z-0">
+        <MarqueeText text="FEAR YAH" speed={50} />
+        <MarqueeText text="FAITH OVER FEAR" direction={-1} speed={45} />
+      </div>
 
-        <m.div 
-          className="block sm:hidden"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-        >
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        {/* LAYOUT REFINEMENT:
+          - lg:grid-cols-10: Tighter grid than 12
+          - lg:gap-8: Reduced gap to bring sections closer
+        */}
+        <div className="grid grid-cols-1 lg:grid-cols-10 lg:gap-0 items-center max-w-7xl mx-auto">
+          
+          {/* --- LEFT: WRITING PART --- */}
           <m.div 
-            variants={mobileItemVariants}
-            className="bg-black border border-white/5 text-white p-6 rounded-sm relative overflow-hidden group"
+            style={{ y: yContent }}
+            className="lg:col-span-5 flex flex-col justify-center order-2 lg:order-1 relative z-20 mt-12 lg:mt-0 px-2 lg:px-0"
           >
-            {/* Mobile Content same as before */}
-            <div>
-              <div className="flex items-center gap-2 text-white/40 mb-4">
-                <HiSparkles className="text-white/60" size={14} />
-                <span className="text-[10px] tracking-[0.25em] uppercase">Est. 2015</span>
+             {/* Decorative Top Tag */}
+            <div className="mb-8 flex items-center gap-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
+              <div className="flex items-center gap-2 border border-white/20 px-3 py-1 bg-white/5 backdrop-blur-sm">
+                <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                <span className="text-[9px] font-mono tracking-[0.2em] text-white/80 uppercase">
+                  System: Online
+                </span>
               </div>
-              <m.h3 variants={textSlideVariants} className="text-2xl font-black tracking-tight mb-4 leading-[1.1]">
-                {storyData.heading}
-              </m.h3>
-              <m.p variants={textSlideVariants} className="text-white/60 text-sm leading-relaxed mb-6">
-                {storyData.description}
-              </m.p>
-              <m.div variants={textSlideVariants} className="flex flex-col gap-4 mt-6">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 border border-white/20 flex items-center justify-center flex-shrink-0">
-                    <IoShirtOutline className="text-white/60" size={16} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] tracking-[0.2em] text-white/40 uppercase">Premium</p>
-                    <p className="text-sm text-white font-semibold">Quality</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 border border-white/20 flex items-center justify-center flex-shrink-0">
-                    <IoEarthOutline className="text-white/60" size={16} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] tracking-[0.2em] text-white/40 uppercase">Global</p>
-                    <p className="text-sm text-white font-semibold">Reach</p>
-                  </div>
-                </div>
-              </m.div>
+              <Barcode />
             </div>
-            <div className="mt-8">
-              <a href="/about" className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/80 hover:text-white transition-all duration-300 group/link">
-                Read The Full Story <HiArrowRight className="group-hover/link:translate-x-2 transition-transform" size={14} />
-              </a>
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-            <div className="absolute top-0 left-0 w-8 h-px bg-white/10" />
-            <div className="absolute top-0 left-0 w-px h-8 bg-white/10" />
-          </m.div>
-        </m.div>
 
-        <m.div 
-          className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4" // TIGHTER GAP
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ staggerChildren: 0.08 }}
-        >
-          <m.div 
-            variants={mobileItemVariants}
-            className="sm:col-span-2 lg:col-span-2 lg:row-span-2 bg-black border border-white/5 text-white p-6 lg:p-8 rounded-sm flex flex-col justify-between relative overflow-hidden group min-h-[420px] lg:min-h-0"
-          >
-            <div>
-              <div className="flex items-center gap-2 text-white/40 mb-6">
-                <HiSparkles className="text-white/60" size={14} />
-                <span className="text-[10px] tracking-[0.3em] uppercase">Est. 2015</span>
-              </div>
-              <m.h3 variants={textSlideVariants} className="text-4xl lg:text-5xl font-black tracking-tight mb-6 leading-[1.1]">
-                {storyData.heading}
-              </m.h3>
-              <m.p variants={textSlideVariants} className="text-white/60 text-base leading-relaxed max-w-lg mb-8">
-                {storyData.description}
-              </m.p>
-              <m.div variants={textSlideVariants} className="flex gap-6 mt-8">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 border border-white/20 flex items-center justify-center flex-shrink-0">
-                    <IoShirtOutline className="text-white/60" size={16} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] tracking-[0.2em] text-white/40 uppercase">Premium</p>
-                    <p className="text-sm text-white font-semibold">Quality</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 border border-white/20 flex items-center justify-center flex-shrink-0">
-                    <IoEarthOutline className="text-white/60" size={16} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] tracking-[0.2em] text-white/40 uppercase">Global</p>
-                    <p className="text-sm text-white font-semibold">Reach</p>
-                  </div>
-                </div>
-              </m.div>
-            </div>
-            <div className="mt-8">
-              <a href="/about" className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-white/80 hover:text-white transition-all duration-300 group/link">
-                Read The Full Story <HiArrowRight className="group-hover/link:translate-x-2 transition-transform" size={14} />
-              </a>
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-            <div className="absolute top-0 left-0 w-12 h-px bg-white/10" />
-            <div className="absolute top-0 left-0 w-px h-12 bg-white/10" />
-          </m.div>
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[0.9] tracking-tighter mb-8 mix-blend-difference">
+              BORN FROM <br />
+              <span className="text-white/30">THE VOID.</span>
+            </h2>
 
-          <m.div 
-            variants={mobileItemVariants}
-            className="sm:col-span-1 lg:row-span-2 relative rounded-sm overflow-hidden h-[380px] md:h-[400px] lg:h-auto lg:min-h-0 group"
-          >
-            <Image
-              src={storyData.heroImage}
-              alt="JENERA fashion movement"
-              fill
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
-              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
-              priority
-            />
-            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500" />
-            <div className="absolute bottom-6 left-6 right-6">
-              <div className="bg-white/95 backdrop-blur-sm px-4 py-3 border border-white/20">
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-black">The New Standard</span>
+            <div className="relative border-l-2 border-white/10 pl-6 space-y-6 max-w-md">
+              <p className="text-white/80 text-sm sm:text-base leading-relaxed font-light">
+                We don’t follow trends — we bury them and build our own. Fear Yah exists to equip the modern rebel with armor for the urban battlefield, grounded in faith, not fear.
+              </p>
+              
+              <div className="grid grid-cols-2 gap-4">
+                 <div>
+                    <span className="block text-[9px] text-white/40 uppercase tracking-widest mb-1">Fabric</span>
+                    <span className="text-xs text-white font-mono">Heavyweight Cotton</span>
+                 </div>
+                 <div>
+                    <span className="block text-[9px] text-white/40 uppercase tracking-widest mb-1">Origin</span>
+                    <span className="text-xs text-white font-mono">Los Angles / United States</span>
+                 </div>
               </div>
             </div>
-            <div className="absolute top-4 left-4 w-8 h-8 border-l border-t border-white/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="absolute bottom-4 right-4 w-8 h-8 border-r border-b border-white/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          </m.div>
 
-          <m.div 
-            variants={mobileItemVariants}
-            className="bg-neutral-900 border border-white/5 p-8 rounded-sm flex flex-col justify-center relative overflow-hidden group min-h-[160px]"
-          >
-            <div>
-              <span className="block text-5xl font-black text-white mb-2">{storyData.stat1.value}</span>
-              <span className="text-[10px] tracking-[0.3em] uppercase text-white/50 leading-tight">{storyData.stat1.label}</span>
-            </div>
-            <div className="absolute bottom-0 left-0 w-full h-1 bg-white/5 group-hover:bg-white/20 transition-colors duration-500" />
-          </m.div>
-
-          <m.div 
-            variants={mobileItemVariants}
-            className="relative rounded-sm overflow-hidden h-[160px] md:h-[200px] lg:h-auto lg:min-h-0 group"
-          >
-            <Image
-              src={storyData.secondaryImage}
-              alt="Material detail and craftsmanship"
-              fill
-              className="object-cover transition-transform duration-700 group-hover:scale-110"
-              sizes="(max-width: 768px) 50vw, (max-width: 1024px) 50vw, 25vw"
-            />
-            <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors duration-500 flex items-center justify-center">
-              <span className="text-white font-mono uppercase tracking-[0.25em] text-xs opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0 px-2 text-center">
-                Obsessive Detail
-              </span>
+            <div className="mt-10 flex items-center gap-8">
+               <a href="/about" className="group inline-flex items-center gap-4 text-white bg-white/5 hover:bg-white/10 px-6 py-3 border border-white/10 transition-all">
+                  <span className="text-xs font-bold tracking-[0.2em] uppercase text-red-500 group-hover:text-white transition-colors">Manifesto</span>
+                  <HiArrowLongRight className="group-hover:translate-x-1 transition-transform duration-300" />
+               </a>
+               <HiQrCode className="text-3xl text-white/20" />
             </div>
           </m.div>
 
+          {/* --- RIGHT: THE DIGITAL MONOLITH (Video) --- */}
           <m.div 
-            variants={mobileItemVariants}
-            className="bg-neutral-900 border border-white/5 p-8 rounded-sm flex flex-col justify-center relative overflow-hidden group min-h-[160px]"
+            style={{ y: yContent }}
+            className="lg:col-span-5 order-1 lg:order-2 flex justify-center lg:justify-start lg:-ml-12 relative z-10" // lg:-ml-12 PULLS IT CLOSER
           >
-            <div>
-              <span className="block text-5xl font-black text-white mb-2">{storyData.stat2.value}</span>
-              <span className="text-[10px] tracking-[0.3em] uppercase text-white/50 leading-tight">{storyData.stat2.label}</span>
+            {/* MOBILE OPTIMIZATION: 
+               - max-w-[260px]: Prevents video from dominating vertical space on phones.
+               - lg:max-w-[400px]: Large on desktop.
+            */}
+            <div className="relative w-full max-w-[260px] sm:max-w-[320px] lg:max-w-[420px] aspect-[9/16] bg-neutral-900 group shadow-[0_0_100px_rgba(0,0,0,0.5)]">
+              
+              {/* Outer Border Frame (Glitch Effect) */}
+              <div className="absolute -inset-1 border border-white/20 opacity-40 group-hover:opacity-100 group-hover:scale-[1.01] transition-all duration-500 pointer-events-none" />
+              <div className="absolute -inset-1 border border-red-500/20 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 group-hover:translate-y-1 transition-all duration-300 pointer-events-none mix-blend-screen" />
+              
+              {/* VIDEO WRAPPER */}
+              <div className="relative w-full h-full overflow-hidden bg-black">
+                 {/* VIDEO 1: GRAYSCALE (Base State) */}
+                 <div className="absolute inset-0 z-0 transition-opacity duration-700 group-hover:opacity-0">
+                    <video
+                        ref={videoRef}
+                        src="/video2.mp4"
+                        className="w-full h-full object-cover filter grayscale contrast-[1.3] brightness-[0.8]"
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                    />
+                    <div className="absolute inset-0 bg-red-900/10 mix-blend-overlay" />
+                    {/* Horizontal Noise Line */}
+                    <div className="absolute w-full h-[2px] bg-white/10 top-1/2 animate-scan" /> 
+                 </div>
+
+                 {/* VIDEO 2: COLOR (Hover State) */}
+                 <div className="absolute inset-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                    <video
+                        src="/video2.mp4"
+                        className="w-full h-full object-cover filter saturate-[1.15]"
+                        autoPlay
+                        loop
+                        muted={isMuted}
+                        playsInline
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80" />
+                 </div>
+
+                 {/* HUD OVERLAY */}
+                 <div className="absolute inset-0 z-20 p-5 flex flex-col justify-between pointer-events-none">
+                    <div className="flex justify-between items-start">
+                       <div className="bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 flex items-center gap-2 rounded-sm">
+                          <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                          <span className="text-[8px] sm:text-[9px] font-mono text-white/90 tracking-widest uppercase">REC • 04:20</span>
+                       </div>
+                       <button 
+                         onClick={toggleAudio} 
+                         className="pointer-events-auto w-9 h-9 flex items-center justify-center bg-white/10 hover:bg-white text-white hover:text-black transition-colors backdrop-blur-md border border-white/20 rounded-full"
+                       >
+                         {isMuted ? <HiSpeakerXMark size={14} /> : <HiSpeakerWave size={14} />}
+                       </button>
+                    </div>
+
+                    <div className="space-y-3">
+                       <m.div 
+                         initial={{ opacity: 0, y: 10 }}
+                         whileInView={{ opacity: 1, y: 0 }}
+                         className="flex items-center justify-between"
+                       >
+                          <span className="text-[10px] font-black italic text-white uppercase mix-blend-difference drop-shadow-md">Fear Yah ©</span>
+                          <AudioBars />
+                       </m.div>
+                       <div className="w-full h-px bg-white/30" />
+                       <div className="flex justify-between text-[8px] font-mono text-white/60 uppercase tracking-widest">
+                          <span>Coord: 35.6762° N</span>
+                          <span>Sector: 7</span>
+                       </div>
+                    </div>
+                 </div>
+              </div>
             </div>
-            <div className="absolute bottom-0 left-0 w-full h-1 bg-white/5 group-hover:bg-white/20 transition-colors duration-500" />
           </m.div>
 
-          <m.div 
-            variants={mobileItemVariants}
-            className="bg-neutral-900 border border-white/5 p-8 rounded-sm flex flex-col justify-center relative overflow-hidden group min-h-[160px]"
-          >
-            <div>
-              <span className="block text-5xl font-black text-white mb-2">{storyData.stat3.value}</span>
-              <span className="text-[10px] tracking-[0.3em] uppercase text-white/50 leading-tight">{storyData.stat3.label}</span>
-            </div>
-            <div className="absolute bottom-0 left-0 w-full h-1 bg-white/5 group-hover:bg-white/20 transition-colors duration-500" />
-          </m.div>
-
-        </m.div>
+        </div>
       </div>
     </section>
   );

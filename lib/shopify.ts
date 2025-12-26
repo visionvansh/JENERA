@@ -139,3 +139,113 @@ export const PRODUCT_BY_HANDLE_QUERY = `
     }
   }
 `;
+
+export async function createCheckout(lineItems: Array<{ variantId: string; quantity: number }>) {
+  const mutation = `
+    mutation checkoutCreate($input: CheckoutCreateInput!) {
+      checkoutCreate(input: $input) {
+        checkout {
+          id
+          webUrl
+        }
+        checkoutUserErrors {
+          code
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  const variables = {
+    input: {
+      lineItems: lineItems.map(item => ({
+        variantId: item.variantId,
+        quantity: item.quantity,
+      })),
+    },
+  };
+
+  try {
+    const data = await shopifyFetch<{
+      checkoutCreate: {
+        checkout: {
+          id: string;
+          webUrl: string;
+        };
+        checkoutUserErrors: Array<{
+          code: string;
+          field: string[];
+          message: string;
+        }>;
+      };
+    }>({
+      query: mutation,
+      variables,
+    });
+
+    if (data.checkoutCreate.checkoutUserErrors.length > 0) {
+      console.error('Checkout errors:', data.checkoutCreate.checkoutUserErrors);
+      throw new Error(data.checkoutCreate.checkoutUserErrors[0].message);
+    }
+
+    return data.checkoutCreate.checkout;
+  } catch (error) {
+    console.error('Error creating checkout:', error);
+    throw error;
+  }
+}
+
+export async function createCart(lineItems: Array<{ merchandiseId: string; quantity: number }>) {
+  const mutation = `
+    mutation cartCreate($input: CartInput!) {
+      cartCreate(input: $input) {
+        cart {
+          id
+          checkoutUrl
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  const variables = {
+    input: {
+      lines: lineItems.map(item => ({
+        merchandiseId: item.merchandiseId,
+        quantity: item.quantity,
+      })),
+    },
+  };
+
+  try {
+    const data = await shopifyFetch<{
+      cartCreate: {
+        cart: {
+          id: string;
+          checkoutUrl: string;
+        };
+        userErrors: Array<{
+          field: string[];
+          message: string;
+        }>;
+      };
+    }>({
+      query: mutation,
+      variables,
+    });
+
+    if (data.cartCreate.userErrors.length > 0) {
+      console.error('Cart errors:', data.cartCreate.userErrors);
+      throw new Error(data.cartCreate.userErrors[0].message);
+    }
+
+    return data.cartCreate.cart;
+  } catch (error) {
+    console.error('Error creating cart:', error);
+    throw error;
+  }
+}

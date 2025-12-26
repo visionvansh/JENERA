@@ -1,5 +1,5 @@
 // src/components/product/ProductPageClient.tsx
-"use client";
+"use client"; 
 
 import { useState, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
@@ -22,7 +22,8 @@ import { CommunityVideoCarousel } from "./CommunityVideoCarousel";
 import { TestimonialsSection } from "../brand";
 import { BrandStory } from "../brand";
 import { MustHaveProducts } from "../brand";
-import { ProductShowcase } from "../brand/ProductShowcase"; // ADDED
+import { ProductShowcase } from "../brand/ProductShowcase";
+import { useCart } from '@/contexts/CartContext';
 
 // --- Data & Constants ---
 
@@ -110,7 +111,7 @@ interface Product {
   id: string;
   handle: string;
   name: string;
-  descriptionHtml: string; // ADDED
+  descriptionHtml: string;
   price: number;
   originalPrice: number | null;
   badge: string | null;
@@ -288,6 +289,9 @@ export function ProductPageClient({
 }: {
   product: Product;
 }) {
+  const { addItem } = useCart();
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+
   // Debug: Log product data on client side
   useEffect(() => {
     console.log("=== CLIENT PRODUCT DATA ===");
@@ -400,6 +404,35 @@ export function ProductPageClient({
   const needsSizeSelection = product.sizes.length > 0 && !selectedSize;
   const needsColorSelection = product.colors.length > 0 && !selectedColor;
   const canAddToCart = !needsSizeSelection && !needsColorSelection && product.availableForSale;
+
+  // Handle add to cart
+  const handleAddToCart = async () => {
+    if (!canAddToCart || !selectedVariant) return;
+
+    setIsAddingToCart(true);
+
+    try {
+      // Add to local cart context
+      addItem({
+        variantId: selectedVariant.id,
+        productId: product.id,
+        name: product.name,
+        price: variantPrice,
+        quantity: 1,
+        image: product.images[0],
+        size: selectedSize || undefined,
+        color: selectedColor || undefined,
+      });
+
+      // Optional: Show success message
+      alert('Added to cart!');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert('Failed to add to cart. Please try again.');
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1600px]">
@@ -625,15 +658,6 @@ export function ProductPageClient({
                   30 Day Money Back Guarantee
                 </span>
               </div>
-
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-white/10 shrink-0">
-                  <HiArrowsPointingIn className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
-                </div>
-                <span className="text-sm lg:text-base text-white/90 font-medium">
-                  Waist Shaping
-                </span>
-              </div>
             </div>
           </div>
 
@@ -726,10 +750,13 @@ export function ProductPageClient({
 
               {/* Add To Cart Button */}
               <button
-                disabled={!canAddToCart}
+                onClick={handleAddToCart}
+                disabled={!canAddToCart || isAddingToCart}
                 className="w-full py-4 lg:py-5 bg-white text-black text-sm lg:text-base tracking-[0.2em] uppercase font-bold hover:bg-white/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-xl"
               >
-                {!product.availableForSale 
+                {isAddingToCart 
+                  ? "Adding..." 
+                  : !product.availableForSale 
                   ? "Sold Out" 
                   : needsSizeSelection
                   ? "Select Size"
@@ -800,7 +827,12 @@ export function ProductPageClient({
         </div>
       </m.div>
 
-      {/* TRUSTED BY SECTION */}
+
+
+      {/* PRODUCT SHOWCASE */}
+      <ProductShowcase description={product.descriptionHtml} />
+
+            {/* TRUSTED BY SECTION */}
       <section
         className="bg-black relative overflow-hidden mb-8 lg:mb-12"
         aria-labelledby="trusted-heading"
@@ -867,9 +899,6 @@ export function ProductPageClient({
           </div>
         </div>
       </section>
-
-      {/* PRODUCT SHOWCASE - ADDED HERE */}
-      <ProductShowcase description={product.descriptionHtml} />
 
       {/* Video Carousel + Instagram Component */}
       <div className="pb-6 lg:pb-8 mb-4 lg:mb-6">

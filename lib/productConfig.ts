@@ -40,6 +40,19 @@ export const PRODUCT_CONFIGS: Record<string, ProductStaticData> = {
     saleEnds: getFutureDate(8),
   },
   
+
+  "faith-driven-bag": {
+    productHandle: "faith-driven-bag",
+    inventory: 50,
+    saleEnds: getFutureDate(2),
+  },
+
+    "quality-sweater": {
+    productHandle: "quality-sweater",
+    inventory: 2,
+    saleEnds: getFutureDate(2),
+  },
+  
   // Add more products here following the same pattern
 };
 

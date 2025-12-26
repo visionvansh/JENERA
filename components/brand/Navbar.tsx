@@ -7,6 +7,8 @@ import Link from "next/link";
 import { HiOutlineShoppingBag, HiOutlineUser, HiOutlineSearch } from "react-icons/hi";
 import { HiXMark, HiBars3 } from "react-icons/hi2";
 import Image from "next/image";
+import { useCart } from '@/contexts/CartContext';
+import { CartDrawer } from '@/components/brand/CartDrawer';
 
 const NAV_LINKS = [
   { id: "new", label: "New Arrivals", href: "#new" },
@@ -16,9 +18,11 @@ const NAV_LINKS = [
 ];
 
 export function Navbar() {
+  const { itemCount } = useCart();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -79,24 +83,24 @@ export function Navbar() {
 
             {/* Center - Logo */}
             <Link
-  href="/"
-  className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center group"
-  aria-label="JENERA Home"
->
-  <div className="relative flex items-center justify-center">
-    <Image
-      src="/logo.png" // <-- your logo path
-      alt="JENERA Logo"
-      width={120}              // adjust as needed
-      height={40}
-      priority
-      className="object-contain"
-    />
+              href="/"
+              className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center group"
+              aria-label="JENERA Home"
+            >
+              <div className="relative flex items-center justify-center">
+                <Image
+                  src="/logo.png"
+                  alt="JENERA Logo"
+                  width={120}
+                  height={40}
+                  priority
+                  className="object-contain"
+                />
 
-    {/* Luxury hover underline */}
-    <div className="absolute -bottom-2 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-  </div>
-</Link>
+                {/* Luxury hover underline */}
+                <div className="absolute -bottom-2 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              </div>
+            </Link>
 
             {/* Right - Navigation Links (Desktop) & Icons */}
             <div className="hidden lg:flex items-center gap-8 flex-1 justify-end">
@@ -128,16 +132,18 @@ export function Navbar() {
               >
                 <HiOutlineUser size={20} />
               </Link>
-              <Link
-                href="/cart"
+              <button
+                onClick={() => setIsCartOpen(true)}
                 className="w-10 h-10 flex items-center justify-center text-white/70 hover:text-white transition-colors relative"
                 aria-label="Shopping bag"
               >
                 <HiOutlineShoppingBag size={20} />
-                <span className="absolute top-1 right-1 w-4 h-4 bg-white text-black text-[10px] font-bold rounded-full flex items-center justify-center">
-                  0
-                </span>
-              </Link>
+                {itemCount > 0 && (
+                  <span className="absolute top-1 right-1 w-4 h-4 bg-white text-black text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {itemCount}
+                  </span>
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -211,6 +217,9 @@ export function Navbar() {
           </m.div>
         )}
       </AnimatePresence>
+
+      {/* Cart Drawer */}
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
   );
 }
