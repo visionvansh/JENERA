@@ -264,7 +264,7 @@ export function HeroSection() {
             animate={{ x: ["0%", "-50%"] }}
             transition={{ duration: 25, ease: "linear", repeat: Infinity }}
           >
-             FEAR YAH — BOW TO NONE BUT ONE — FEAR YAH — BOW TO NONE BUT ONE — 
+             FEAR YAH BOW TO NONE BUT ONE FEAR YAH BOW TO NONE BUT ONE 
           </m.div>
         </div>
       </m.div>

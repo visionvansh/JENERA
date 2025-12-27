@@ -2,7 +2,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { LazyMotion, domAnimation, AnimatePresence, m, useScroll, useTransform, domMax } from "framer-motion";
+// FIX: Reverted to 'm' to satisfy global LazyMotion provider.
+import { AnimatePresence, m, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 import { HiXMark, HiArrowLongRight } from "react-icons/hi2";
 import { getDropStatus } from "@/app/actions";
@@ -11,11 +12,8 @@ import {
   HeroSection,
   MustHaveProducts,
   ShopByCategories,
-  FeaturedCollection,
   BrandStory,
   TrustedBy,
-  ProductShowcase,
-  LookbookSection,
   TestimonialsSection,
   NewsletterSection,
   Footer,
@@ -26,21 +24,13 @@ import {
 const CinematicLogoVideo = () => {
   const containerRef = useRef<HTMLElement>(null);
   
-  // Track scroll progress relative to this specific component
-  // "start end" = when top of component hits bottom of screen
-  // "end start" = when bottom of component hits top of screen
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start end", "end start"],
   });
 
-  // 1. SCALE (Zoom In): Mimics HeroSection bgScale [1, 1.1]
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
-  
-  // 2. PARALLAX (Float): Moves the video slightly within its container
   const y = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
-  
-  // 3. OPACITY: Fades in/out at edges for smoothness
   const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.8, 1, 1, 0.8]);
 
   return (
@@ -50,11 +40,9 @@ const CinematicLogoVideo = () => {
     >
       <m.div 
         style={{ scale, y, opacity }} 
-        className="absolute inset-0 w-full h-[120%] -top-[10%]" // Height > 100% to allow parallax movement
+        className="absolute inset-0 w-full h-[120%] -top-[10%]" 
       >
-        {/* Dark Overlay for cinematic mood */}
         <div className="absolute inset-0 bg-black/10 z-10" />
-        
         <video
           className="w-full h-full object-cover"
           src="/video1.mp4"
@@ -64,8 +52,6 @@ const CinematicLogoVideo = () => {
           playsInline
         />
       </m.div>
-      
-      {/* Top and Bottom Gradients to blend seamlessly with the black page background */}
       <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-black to-transparent z-20 pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-black to-transparent z-20 pointer-events-none" />
     </section>
@@ -73,7 +59,6 @@ const CinematicLogoVideo = () => {
 };
 
 // --- MERGED POPUP COMPONENTS ---
-
 const HIGHLIGHT_IMAGES = [
   "/landscape.png",
   "/landscape2.png",
@@ -86,11 +71,10 @@ const ProductMarquee = () => {
       <div className="absolute inset-0 z-20 bg-gradient-to-b from-black/60 via-transparent to-black/80 pointer-events-none" />
       <div className="absolute inset-0 z-20 bg-red-950/10 mix-blend-overlay pointer-events-none" />
       
-      {/* --- MOBILE: Horizontal Scroll (Faster Speed) --- */}
+      {/* --- MOBILE: Horizontal Scroll --- */}
       <m.div
         className="flex flex-row md:hidden gap-0 h-full"
         animate={{ x: ["0%", "-50%"] }}
-        // Changed duration from 20 to 10 to increase speed
         transition={{ duration: 10, ease: "linear", repeat: Infinity }}
       >
         {[...HIGHLIGHT_IMAGES, ...HIGHLIGHT_IMAGES, ...HIGHLIGHT_IMAGES].map((src, idx) => (
@@ -106,7 +90,7 @@ const ProductMarquee = () => {
         ))}
       </m.div>
 
-      {/* --- DESKTOP: Vertical Scroll (Unchanged) --- */}
+      {/* --- DESKTOP: Vertical Scroll --- */}
       <m.div
         className="hidden md:flex flex-col gap-0 w-full"
         animate={{ y: ["0%", "-50%"] }}
@@ -133,26 +117,17 @@ interface HomePageClientProps {
 }
 
 export default function HomePageClient({ initialDropState }: HomePageClientProps) {
-  // Initialize with Server State (0ms delay on first load)
   const [showDropSquare, setShowDropSquare] = useState(initialDropState);
-  
-  // Popup States
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
 
-  // ---------------------------------------------------------
-  // LIVE SYNC: Check DB every 3 seconds to update active tabs
-  // ---------------------------------------------------------
   useEffect(() => {
-    // Set initial popup state based on mode
     if (initialDropState) setIsPopupOpen(true);
 
     const interval = setInterval(async () => {
       const latestStatus = await getDropStatus();
       setShowDropSquare(latestStatus);
-      
-      // If mode switched to DROP, force popup open
       if (latestStatus && !showDropSquare) {
         setIsPopupOpen(true);
       }
@@ -161,15 +136,11 @@ export default function HomePageClient({ initialDropState }: HomePageClientProps
     return () => clearInterval(interval);
   }, [initialDropState, showDropSquare]);
 
-  // ---------------------------------------------------------
-  // POPUP TIMER (Only for Main Page Mode)
-  // ---------------------------------------------------------
   useEffect(() => {
     if (showDropSquare) {
       setIsPopupOpen(true);
       return;
     }
-
     const hasSeenPopup = sessionStorage.getItem("fy-popup-seen");
     if (!hasSeenPopup) {
       const timer = setTimeout(() => setIsPopupOpen(true), 3500);
@@ -179,11 +150,8 @@ export default function HomePageClient({ initialDropState }: HomePageClientProps
     }
   }, [showDropSquare]);
 
-  // ---------------------------------------------------------
-  // HANDLERS
-  // ---------------------------------------------------------
   const handleClose = () => {
-    if (showDropSquare) return; // Locked in Drop Mode
+    if (showDropSquare) return;
     setIsPopupOpen(false);
     sessionStorage.setItem("fy-popup-seen", "true");
   };
@@ -200,9 +168,6 @@ export default function HomePageClient({ initialDropState }: HomePageClientProps
     }, 1500);
   };
 
-  // ---------------------------------------------------------
-  // POPUP UI
-  // ---------------------------------------------------------
   const PopupUI = ({ forceOpen }: { forceOpen: boolean }) => (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 sm:px-6">
       <m.div
@@ -276,11 +241,12 @@ export default function HomePageClient({ initialDropState }: HomePageClientProps
     </div>
   );
 
+  // FIX: Using conditional rendering with 'm.div' but REMOVED the AnimatePresence wrapper around the main content blocks.
+  // This allows the child components (TrustedBy, BrandStory) to mount cleanly without AnimatePresence confusing the tree.
   return (
-    <LazyMotion features={domMax} strict>
+    <>
       <div className="fixed inset-0 bg-black -z-20" />
       <div suppressHydrationWarning className="contents">
-        <AnimatePresence mode="wait" initial={false}>
           {showDropSquare ? (
             <m.div key="drop-square-mode" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="relative min-h-screen bg-black">
                <AnimatePresence>{isPopupOpen && <PopupUI forceOpen={true} />}</AnimatePresence>
@@ -292,25 +258,18 @@ export default function HomePageClient({ initialDropState }: HomePageClientProps
               <AnimatePresence>{isPopupOpen && <PopupUI forceOpen={false} />}</AnimatePresence>
               <main id="main-content">
                 <HeroSection />
-                
-                {/* Section 1: Must Have Products
-                   Section 2: Cinematic Logo Video (New)
-                */}
                 <MustHaveProducts />
                 <CinematicLogoVideo />
-                
                 <ShopByCategories />
-                {/* <FeaturedCollection /> */}
+                <BrandStory /> 
                 <TrustedBy />
-                <BrandStory />
-                <TestimonialsSection />
+                <TestimonialsSection /> 
                 <NewsletterSection />
               </main>
               <Footer />
             </m.div>
           )}
-        </AnimatePresence>
       </div>
-    </LazyMotion>
+    </>
   );
 }
