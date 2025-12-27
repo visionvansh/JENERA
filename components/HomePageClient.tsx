@@ -86,13 +86,34 @@ const ProductMarquee = () => {
       <div className="absolute inset-0 z-20 bg-gradient-to-b from-black/60 via-transparent to-black/80 pointer-events-none" />
       <div className="absolute inset-0 z-20 bg-red-950/10 mix-blend-overlay pointer-events-none" />
       
+      {/* --- MOBILE: Horizontal Scroll (Faster Speed) --- */}
       <m.div
-        className="flex flex-col gap-0"
+        className="flex flex-row md:hidden gap-0 h-full"
+        animate={{ x: ["0%", "-50%"] }}
+        // Changed duration from 20 to 10 to increase speed
+        transition={{ duration: 10, ease: "linear", repeat: Infinity }}
+      >
+        {[...HIGHLIGHT_IMAGES, ...HIGHLIGHT_IMAGES, ...HIGHLIGHT_IMAGES].map((src, idx) => (
+          <div key={`mob-${idx}`} className="relative h-full aspect-[4/3] min-w-[200px] flex-shrink-0 filter saturate-[1.1]">
+            <Image
+              src={src}
+              alt="Fear Yah Collection"
+              fill
+              className="object-cover"
+              sizes="50vw"
+            />
+          </div>
+        ))}
+      </m.div>
+
+      {/* --- DESKTOP: Vertical Scroll (Unchanged) --- */}
+      <m.div
+        className="hidden md:flex flex-col gap-0 w-full"
         animate={{ y: ["0%", "-50%"] }}
         transition={{ duration: 30, ease: "linear", repeat: Infinity }}
       >
         {[...HIGHLIGHT_IMAGES, ...HIGHLIGHT_IMAGES].map((src, idx) => (
-          <div key={idx} className="relative w-full aspect-[4/3] filter saturate-[1.1]">
+          <div key={`desk-${idx}`} className="relative w-full aspect-[4/3] filter saturate-[1.1]">
             <Image
               src={src}
               alt="Fear Yah Collection"

@@ -52,6 +52,12 @@ export const PRODUCT_CONFIGS: Record<string, ProductStaticData> = {
     inventory: 2,
     saleEnds: getFutureDate(2),
   },
+
+      "fear-yah-carry-bag": {
+    productHandle: "fear-yah-carry-bag",
+    inventory: 6,
+    saleEnds: getFutureDate(2),
+  },
   
   // Add more products here following the same pattern
 };
